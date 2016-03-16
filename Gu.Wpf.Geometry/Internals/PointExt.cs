@@ -6,9 +6,14 @@
 
     internal static class PointExt
     {
-        internal static Point Offset(this Point p, Vector direction, double distance)
+        internal static Point WithOffset(this Point p, Vector direction, double distance)
         {
             return p + distance * direction;
+        }
+
+        internal static Point WithOffset(this Point p, double x, double y)
+        {
+            return new Point(p.X + x, p.Y + y);
         }
 
         internal static double DistanceTo(this Point p, Point other)
@@ -25,5 +30,6 @@
         {
             return $"{p.X.ToString(format, CultureInfo.InvariantCulture)},{p.Y.ToString(format, CultureInfo.InvariantCulture)}";
         }
+
     }
 }

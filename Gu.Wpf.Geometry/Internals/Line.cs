@@ -54,8 +54,8 @@
         public Line Offset(double distance)
         {
             var v = PerpendicularDirection;
-            var sp = StartPoint.Offset(v, distance);
-            var ep = EndPoint.Offset(v, distance);
+            var sp = StartPoint.WithOffset(v, distance);
+            var ep = EndPoint.WithOffset(v, distance);
             return new Line(sp, ep);
         }
 

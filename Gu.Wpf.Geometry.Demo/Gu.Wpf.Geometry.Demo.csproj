@@ -50,6 +50,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BalloonView.xaml.cs">
+      <DependentUpon>BalloonView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="BoundingBoxView.xaml.cs">
       <DependentUpon>BoundingBoxView.xaml</DependentUpon>
     </Compile>
@@ -59,6 +62,10 @@
     <Compile Include="SimpleView.xaml.cs">
       <DependentUpon>SimpleView.xaml</DependentUpon>
     </Compile>
+    <Page Include="BalloonView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="BoundingBoxView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

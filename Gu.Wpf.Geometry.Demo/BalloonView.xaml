@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Gu.Wpf.Geometry.Demo.BalloonView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:geometry="http://gu.se/Geometry"
+             xmlns:local="clr-namespace:Gu.Wpf.Geometry.Demo"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="ShapeStyle"
+               TargetType="{x:Type Shape}">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="Height" Value="120" />
+            <Setter Property="StrokeThickness" Value="5" />
+            <Setter Property="Opacity" Value="0.5" />
+            <Setter Property="Stretch" Value="None" />
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Rectangle Fill="Yellow"
+                   Style="{StaticResource ShapeStyle}" />
+        <geometry:Balloon ConnectorPoint="10,-30"
+                          ConnectorAngle="10"
+                          CornerRadius="10,20,30,40"
+                          Stroke="CornflowerBlue"
+                          Style="{StaticResource ShapeStyle}" />
+    </Grid>
+</UserControl>

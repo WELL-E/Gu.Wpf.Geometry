@@ -43,6 +43,7 @@ namespace Gu.Wpf.Geometry.Demo
             {
                 return;
             }
+
             var parent = (IInputElement)VisualTreeHelper.GetParent(this);
             var pointMouse = args.GetPosition(parent);
             SetCurrentValue(CenterProperty, pointMouse);

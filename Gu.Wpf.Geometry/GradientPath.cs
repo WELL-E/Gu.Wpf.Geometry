@@ -227,8 +227,8 @@ namespace Gu.Wpf.Geometry
         {
             var mp = line.MidPoint;
             var v = line.PerpendicularDirection;
-            var startPoint = mp.Offset(v, strokeThickness/2);
-            var endPoint = mp.Offset(v, -strokeThickness/2);
+            var startPoint = mp.WithOffset(v, strokeThickness/2);
+            var endPoint = mp.WithOffset(v, -strokeThickness/2);
             return new LinearGradientBrush(gradientStops, startPoint, endPoint)
             {
                 MappingMode = BrushMappingMode.Absolute,
