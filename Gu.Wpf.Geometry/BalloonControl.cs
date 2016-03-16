@@ -18,6 +18,12 @@ namespace Gu.Wpf.Geometry
             typeof(BalloonControl),
             new PropertyMetadata(default(UIElement), OnPlacementTargetChanged));
 
+        public static readonly DependencyProperty PlacementOptionsProperty = DependencyProperty.Register(
+            "PlacementOptions",
+            typeof(PlacementOptions),
+            typeof(BalloonControl),
+            new PropertyMetadata(default(PlacementOptions), OnPlacementOptionsChanged));
+
         static BalloonControl()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(BalloonControl), new FrameworkPropertyMetadata(typeof(BalloonControl)));
@@ -47,13 +53,27 @@ namespace Gu.Wpf.Geometry
             set { SetValue(PlacementTargetProperty, value); }
         }
 
-        protected virtual void UpdateConnectorPoint(object _, EventArgs __)
+        public PlacementOptions PlacementOptions
+        {
+            get { return (PlacementOptions)GetValue(PlacementOptionsProperty); }
+            set { SetValue(PlacementOptionsProperty, value); }
+        }
+
+        protected virtual void OnLayoutUpdated(object _, EventArgs __)
         {
             if (this.IsLoaded && PlacementTarget != null)
             {
-                var p1 = this.PointToScreen(new Point(0, 0));
-                var p2 = PlacementTarget.PointToScreen(new Point(0, 0));
+                var p1 = this.PointToScreen(new Point(0,0));
+                var placementRect = new Rect(new Point(0, 0), PlacementTarget.RenderSize);
+                var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                p2 = PlacementTarget.PointToScreen(p2);
                 var v = p2 - p1;
+                if (PlacementOptions != null && PlacementOptions.Offset != 0)
+                {
+                    var uv = v.Normalized();
+                    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
+                    v = v + offset;
+                }
                 SetCurrentValue(ConnectorPointProperty, new Point(v.X, v.Y));
             }
             else
@@ -62,14 +82,21 @@ namespace Gu.Wpf.Geometry
             }
         }
 
+        private static void OnPlacementOptionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var balloonControl = (BalloonControl)d;
+            balloonControl.OnLayoutUpdated(null, null);
+        }
+
         private static void OnPlacementTargetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var balloonControl = (BalloonControl)d;
-            balloonControl.UpdateConnectorPoint(null, null);
-            balloonControl.LayoutUpdated -= balloonControl.UpdateConnectorPoint;
-            balloonControl.LayoutUpdated += balloonControl.UpdateConnectorPoint;
-            WeakEventManager<UIElement, EventArgs>.RemoveHandler((UIElement)e.OldValue, nameof(UIElement.LayoutUpdated), balloonControl.UpdateConnectorPoint);
-            WeakEventManager<UIElement, EventArgs>.AddHandler((UIElement)e.NewValue, nameof(UIElement.LayoutUpdated), balloonControl.UpdateConnectorPoint);
+            balloonControl.OnLayoutUpdated(null, null);
+            // unsubscribing and subscribing here to have only one subscription
+            balloonControl.LayoutUpdated -= balloonControl.OnLayoutUpdated;
+            balloonControl.LayoutUpdated += balloonControl.OnLayoutUpdated;
+            WeakEventManager<UIElement, EventArgs>.RemoveHandler((UIElement)e.OldValue, nameof(UIElement.LayoutUpdated), balloonControl.OnLayoutUpdated);
+            WeakEventManager<UIElement, EventArgs>.AddHandler((UIElement)e.NewValue, nameof(UIElement.LayoutUpdated), balloonControl.OnLayoutUpdated);
         }
     }
 }

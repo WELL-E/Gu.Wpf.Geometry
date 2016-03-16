@@ -16,22 +16,28 @@
         <TextBox x:Name="TextBox"
                  Grid.Row="0"
                  Text="Lorem ipsum dolor sit amet" />
+
+        <Canvas Grid.Row="1">
+            <Rectangle x:Name="Target"
+                       Canvas.Left="{Binding Center.X,
+                                             ElementName=Dot}"
+                       Canvas.Top="{Binding Center.Y,
+                                            ElementName=Dot}"
+                       Width="100"
+                       Height="10"
+                       Fill="Gainsboro" />
+        </Canvas>
+
         <local:Dot x:Name="Dot"
                    Grid.Row="1"
                    Center="70 40" />
-        <Canvas Grid.Row="1">
-            <FrameworkElement x:Name="Target"
-                              Canvas.Left="{Binding Center.X,
-                                                    ElementName=Dot}"
-                              Canvas.Top="{Binding Center.Y,
-                                                   ElementName=Dot}" />
-        </Canvas>
         <geometry:BalloonControl Grid.Row="1"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center"
                                  ConnectorAngle="25"
                                  ConnectorPoint="35,-10"
                                  CornerRadius="5"
+                                 PlacementOptions="Bottom, Left"
                                  PlacementTarget="{Binding ElementName=Target}">
             <Grid Margin="5">
                 <Grid.RowDefinitions>

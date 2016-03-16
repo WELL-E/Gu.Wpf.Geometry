@@ -18,5 +18,12 @@
             var sa = Math.Sin(radians);
             return new Vector(ca * v.X - sa * v.Y, sa * v.X + ca * v.Y);
         }
+
+        public static Vector Normalized(this Vector v)
+        {
+            var uv = new Vector(v.X, v.Y);
+            uv.Normalize();
+            return uv;
+        }
     }
 }
