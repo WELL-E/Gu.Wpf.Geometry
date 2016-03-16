@@ -30,7 +30,7 @@ namespace Gu.Wpf.Geometry
             typeof(double),
             typeof(Balloon),
             new FrameworkPropertyMetadata(
-                default(double),
+                15.0,
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnConnectorChanged));
 
@@ -136,6 +136,11 @@ namespace Gu.Wpf.Geometry
 
         protected virtual Geometry CreateConnectorGeometry(Size size, Geometry box)
         {
+            if (ConnectorPoint == default(Point))
+            {
+                return Geometry.Empty;
+            }
+
             var width = size.Width - StrokeThickness;
             var height = size.Height - StrokeThickness;
             var geometry = new StreamGeometry();
