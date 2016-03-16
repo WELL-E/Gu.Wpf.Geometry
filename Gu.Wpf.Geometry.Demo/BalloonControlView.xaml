@@ -5,7 +5,7 @@
              xmlns:geometry="http://gu.se/Geometry"
              xmlns:local="clr-namespace:Gu.Wpf.Geometry.Demo"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="300"
+             d:DesignHeight="200"
              d:DesignWidth="300"
              mc:Ignorable="d">
     <Grid>
@@ -16,7 +16,10 @@
         <TextBox x:Name="TextBox"
                  Grid.Row="0"
                  Text="Lorem ipsum dolor sit amet" />
-        <geometry:BalloonControl Grid.Row="2"
+        <local:Dot Grid.Row="1" x:Name="linePtBeg"
+                   Center="50 50" />
+        <geometry:BalloonControl Grid.Row="1"
+                                 CornerRadius="5"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center">
             <TextBlock Text="{Binding Text, ElementName=TextBox}" />

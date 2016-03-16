@@ -17,6 +17,8 @@ namespace Gu.Wpf.Geometry.Demo
                 new PropertyMetadata(new Point(), OnCenterChanged));
 
         private bool isDragging;
+        private Point mouseDragStart;
+        private Point dragStartPos;
 
         public Dot()
         {
@@ -33,6 +35,8 @@ namespace Gu.Wpf.Geometry.Demo
         {
             base.OnMouseLeftButtonDown(args);
             isDragging = true;
+            mouseDragStart = args.GetPosition(this);
+            dragStartPos = this.Center;
             CaptureMouse();
         }
 
@@ -44,9 +48,10 @@ namespace Gu.Wpf.Geometry.Demo
                 return;
             }
 
-            var parent = (IInputElement)VisualTreeHelper.GetParent(this);
-            var pointMouse = args.GetPosition(parent);
-            SetCurrentValue(CenterProperty, pointMouse);
+            var pos = args.GetPosition(this);
+            var offset = pos - dragStartPos;
+            var center = this.dragStartPos + offset;
+            SetCurrentValue(CenterProperty, center);
         }
 
         protected override void OnMouseLeftButtonUp(MouseButtonEventArgs args)

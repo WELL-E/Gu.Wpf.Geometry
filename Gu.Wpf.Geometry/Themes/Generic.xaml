@@ -4,13 +4,14 @@
     <Style TargetType="{x:Type local:BalloonControl}">
         <Setter Property="BorderBrush" Value="CornflowerBlue" />
         <Setter Property="BorderThickness" Value="3" />
+        <Setter Property="CornerRadius" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:BalloonControl}">
                     <Grid>
                         <local:Balloon ConnectorAngle="15"
                                        ConnectorPoint="15,-15"
-                                       CornerRadius="5"
+                                       CornerRadius="{TemplateBinding CornerRadius}"
                                        Stroke="{TemplateBinding BorderBrush}"
                                        StrokeThickness="{Binding BorderThickness.Left,
                                                                  RelativeSource={RelativeSource TemplatedParent}}" />
