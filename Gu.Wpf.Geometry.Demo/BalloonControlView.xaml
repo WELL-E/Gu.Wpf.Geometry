@@ -16,15 +16,33 @@
         <TextBox x:Name="TextBox"
                  Grid.Row="0"
                  Text="Lorem ipsum dolor sit amet" />
-        <local:Dot Grid.Row="1" x:Name="linePtBeg"
-                   Center="50 50" />
+        <local:Dot x:Name="linePtBeg"
+                   Grid.Row="1"
+                   Center="70 40" />
         <geometry:BalloonControl Grid.Row="1"
-                                 CornerRadius="5"
                                  HorizontalAlignment="Center"
-                                 VerticalAlignment="Center">
-            <TextBlock Text="{Binding Text, ElementName=TextBox}" />
+                                 VerticalAlignment="Center"
+                                 CornerRadius="5">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Text, ElementName=TextBox}" />
+                <UniformGrid Grid.Row="1"
+                             Rows="1">
+                    <Ellipse Width="20"
+                             Height="20"
+                             Fill="Blue" />
+                    <Ellipse Width="20"
+                             Height="20"
+                             Fill="Yellow" />
+                    <Ellipse Width="20"
+                             Height="20"
+                             Fill="Red" />
+                </UniformGrid>
+            </Grid>
         </geometry:BalloonControl>
-
     </Grid>
 </UserControl>
 
