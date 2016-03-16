@@ -3,23 +3,31 @@
     using System;
     using System.ComponentModel;
     using System.Windows;
-    using Gu.Wpf.Geometry;
 
     [TypeConverter(typeof(PlacementOptionsConverter))]
     public class PlacementOptions
     {
-        public VerticalPlacement VerticalPlacement { get; set; }
+        public static readonly PlacementOptions Center = new PlacementOptions(HorizontalPlacement.Center, VerticalPlacement.Center, 0);
 
-        public HorizontalPlacement HorizontalPlacement { get; set; }
+        public PlacementOptions(HorizontalPlacement horizontal, VerticalPlacement vertical, double offset)
+        {
+            this.Vertical = vertical;
+            this.Horizontal = horizontal;
+            this.Offset = offset;
+        }
 
-        public double Offset { get; set; }
+        public HorizontalPlacement Horizontal { get; }
+
+        public VerticalPlacement Vertical { get; }
+
+        public double Offset { get; }
 
         public Point GetPoint(Rect rect)
         {
-            switch (this.VerticalPlacement)
+            switch (this.Vertical)
             {
                 case VerticalPlacement.Top:
-                    switch (HorizontalPlacement)
+                    switch (this.Horizontal)
                     {
                         case HorizontalPlacement.Left:
                             return rect.TopLeft;
@@ -31,7 +39,7 @@
                             throw new ArgumentOutOfRangeException();
                     }
                 case VerticalPlacement.Center:
-                    switch (HorizontalPlacement)
+                    switch (this.Horizontal)
                     {
                         case HorizontalPlacement.Left:
                             return MidPoint(rect.BottomLeft, rect.TopLeft);
@@ -43,7 +51,7 @@
                             throw new ArgumentOutOfRangeException();
                     }
                 case VerticalPlacement.Bottom:
-                    switch (HorizontalPlacement)
+                    switch (this.Horizontal)
                     {
                         case HorizontalPlacement.Left:
                             return rect.BottomLeft;

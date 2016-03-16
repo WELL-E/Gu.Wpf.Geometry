@@ -35,9 +35,9 @@
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center"
                                  ConnectorAngle="25"
-                                 ConnectorPoint="35,-10"
+                                 ConnectorOffset="35,-10"
                                  CornerRadius="5"
-                                 PlacementOptions="Bottom, Left"
+                                 PlacementOptions="Top, Left"
                                  PlacementTarget="{Binding ElementName=Target}">
             <Grid Margin="5">
                 <Grid.RowDefinitions>

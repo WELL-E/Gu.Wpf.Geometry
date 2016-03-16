@@ -1,5 +1,7 @@
 namespace Gu.Wpf.Geometry
 {
+    using System;
+    using System.Diagnostics;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Shapes;
@@ -15,12 +17,12 @@ namespace Gu.Wpf.Geometry
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnCornerRadiusChanged));
 
-        public static readonly DependencyProperty ConnectorPointProperty = DependencyProperty.Register(
-            "ConnectorPoint",
-            typeof(Point),
+        public static readonly DependencyProperty ConnectorOffsetProperty = DependencyProperty.Register(
+            "ConnectorOffset",
+            typeof(Vector),
             typeof(Balloon),
             new FrameworkPropertyMetadata(
-                default(Point),
+                default(Vector),
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnConnectorChanged));
 
@@ -45,27 +47,27 @@ namespace Gu.Wpf.Geometry
 
         public CornerRadius CornerRadius
         {
-            get { return (CornerRadius)GetValue(CornerRadiusProperty); }
-            set { SetValue(CornerRadiusProperty, value); }
+            get { return (CornerRadius)this.GetValue(CornerRadiusProperty); }
+            set { this.SetValue(CornerRadiusProperty, value); }
         }
 
-        public Point ConnectorPoint
+        public Vector ConnectorOffset
         {
-            get { return (Point)GetValue(ConnectorPointProperty); }
-            set { SetValue(ConnectorPointProperty, value); }
+            get { return (Vector)this.GetValue(ConnectorOffsetProperty); }
+            set { this.SetValue(ConnectorOffsetProperty, value); }
         }
 
         public double ConnectorAngle
         {
-            get { return (double)GetValue(ConnectorAngleProperty); }
-            set { SetValue(ConnectorAngleProperty, value); }
+            get { return (double)this.GetValue(ConnectorAngleProperty); }
+            set { this.SetValue(ConnectorAngleProperty, value); }
         }
 
         protected override Geometry DefiningGeometry => this.boxGeometry ?? Geometry.Empty;
 
         protected override Size MeasureOverride(Size constraint)
         {
-            return new Size(StrokeThickness, StrokeThickness);
+            return new Size(this.StrokeThickness, this.StrokeThickness);
         }
 
         protected override Size ArrangeOverride(Size finalSize)
@@ -76,13 +78,13 @@ namespace Gu.Wpf.Geometry
         protected override void OnRender(DrawingContext drawingContext)
         {
             var pen = this.penCache.GetPen(this.Stroke, this.StrokeThickness);
-            drawingContext.DrawGeometry(Fill, pen, this.balloonGeometry);
+            drawingContext.DrawGeometry(this.Fill, pen, this.balloonGeometry);
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);
-            UpdateCachedGeometries();
+            this.UpdateCachedGeometries();
             this.InvalidateVisual();
         }
 
@@ -96,62 +98,81 @@ namespace Gu.Wpf.Geometry
                 return;
             }
 
-            this.boxGeometry = CreateBoxGeometry(this.RenderSize);
-            this.connectorGeometry = CreateConnectorGeometry(this.RenderSize, this.boxGeometry);
-            this.balloonGeometry = CreateGeometry(this.boxGeometry, this.connectorGeometry);
+            this.boxGeometry = this.CreateBoxGeometry(this.RenderSize);
+            this.connectorGeometry = this.CreateConnectorGeometry(this.RenderSize);
+            this.balloonGeometry = this.CreateGeometry(this.boxGeometry, this.connectorGeometry);
         }
 
         protected virtual Geometry CreateBoxGeometry(Size size)
         {
-            var width = size.Width - StrokeThickness;
-            var height = size.Height - StrokeThickness;
+            var width = size.Width - this.StrokeThickness;
+            var height = size.Height - this.StrokeThickness;
 
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
-                var p = CornerRadius.TopLeft > 0
-                    ? new Point(CornerRadius.TopLeft + StrokeThickness / 2, StrokeThickness / 2)
-                    : new Point(StrokeThickness / 2, StrokeThickness / 2);
+                var p = this.CornerRadius.TopLeft > 0
+                    ? new Point(this.CornerRadius.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
+                    : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
                 context.BeginFigure(p, true, true);
-                p = p.WithOffset(width - CornerRadius.TopLeft - CornerRadius.TopRight, 0);
+                p = p.WithOffset(width - this.CornerRadius.TopLeft - this.CornerRadius.TopRight, 0);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, CornerRadius.TopRight, CornerRadius.TopRight);
+                p = context.DrawCorner(p, this.CornerRadius.TopRight, this.CornerRadius.TopRight);
 
-                p = p.WithOffset(0, height - CornerRadius.TopRight - CornerRadius.BottomRight);
+                p = p.WithOffset(0, height - this.CornerRadius.TopRight - this.CornerRadius.BottomRight);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -CornerRadius.BottomRight, CornerRadius.BottomRight);
+                p = context.DrawCorner(p, -this.CornerRadius.BottomRight, this.CornerRadius.BottomRight);
 
-                p = p.WithOffset(-width + CornerRadius.BottomRight + CornerRadius.BottomLeft, 0);
+                p = p.WithOffset(-width + this.CornerRadius.BottomRight + this.CornerRadius.BottomLeft, 0);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -CornerRadius.BottomLeft, -CornerRadius.BottomLeft);
+                p = context.DrawCorner(p, -this.CornerRadius.BottomLeft, -this.CornerRadius.BottomLeft);
 
-                p = p.WithOffset(0, -height + CornerRadius.TopLeft + CornerRadius.BottomLeft);
+                p = p.WithOffset(0, -height + this.CornerRadius.TopLeft + this.CornerRadius.BottomLeft);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, CornerRadius.TopLeft, -CornerRadius.TopLeft);
+                p = context.DrawCorner(p, this.CornerRadius.TopLeft, -this.CornerRadius.TopLeft);
             }
             geometry.Freeze();
             return geometry;
         }
 
-        protected virtual Geometry CreateConnectorGeometry(Size size, Geometry box)
+        protected virtual Geometry CreateConnectorGeometry(Size size)
         {
-            if (ConnectorPoint == default(Point))
+            if (this.ConnectorOffset == default(Vector))
             {
                 return Geometry.Empty;
             }
 
-            var width = size.Width - StrokeThickness;
-            var height = size.Height - StrokeThickness;
+            var width = size.Width - this.StrokeThickness;
+            var height = size.Height - this.StrokeThickness;
             var geometry = new StreamGeometry();
+            var mp = new Point(width / 2, height / 2);
+
+            var direction = this.ConnectorOffset.Normalized();
+            var length = width * width + height * height;
+            var line = new Line(mp, mp + length * direction);
+            var rectangle = new Rect(new Point(0, 0), size);
+            var ip = line.IntersectWith(rectangle);
+            if (ip == null)
+            {
+                Debug.Assert(false, "This should not happen");
+                return Geometry.Empty;
+            }
+
+            var sp = ip.Value + this.ConnectorOffset;
+            var p1 = new Line(sp,
+                              sp + length * direction.Rotate(this.ConnectorAngle / 2).Negated())
+                            .IntersectWith(rectangle) ??
+                            ip;
+            var p2 = new Line(sp,
+                              sp + length * direction.Rotate(-this.ConnectorAngle / 2).Negated())
+                            .IntersectWith(rectangle) ??
+                            ip;
+
             using (var context = geometry.Open())
             {
-                context.BeginFigure(ConnectorPoint, true, true);
-                var mp = new Point(width / 2, height / 2);
-                var v = mp - ConnectorPoint;
-                var p = ConnectorPoint + v.Rotate(ConnectorAngle / 2);
-                context.LineTo(p, true, true);
-                p = ConnectorPoint + v.Rotate(-ConnectorAngle / 2);
-                context.LineTo(p, true, true);
+                context.BeginFigure(sp, true, true);
+                context.LineTo(p1.Value, true, true);
+                context.LineTo(p2.Value, true, true);
             }
             geometry.Freeze();
             return geometry;
@@ -198,7 +219,7 @@ namespace Gu.Wpf.Geometry
                 this.brush = brush;
                 this.strokeThickness = strokeThickness;
                 this.pen = new Pen(brush, strokeThickness);
-                return pen;
+                return this.pen;
             }
         }
     }

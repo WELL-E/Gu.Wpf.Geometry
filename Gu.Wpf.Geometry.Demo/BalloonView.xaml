@@ -8,13 +8,20 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <Grid>
-        <!--<Rectangle Width="120"
-                   Height="100"
-                   Fill="Yellow" />-->
-        <geometry:Balloon Width="120"
-                          Height="100"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <geometry:Balloon Grid.Row="1"
+                          Grid.Column="1"
                           ConnectorAngle="15"
-                          ConnectorPoint="6,-15"
+                          ConnectorOffset="-100,-100"
                           CornerRadius="16"
                           Stroke="CornflowerBlue"
                           StrokeThickness="4" />

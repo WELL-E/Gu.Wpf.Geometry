@@ -8,7 +8,7 @@ namespace Gu.Wpf.Geometry
     {
         public static readonly DependencyProperty CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner(typeof(BalloonControl));
 
-        public static readonly DependencyProperty ConnectorPointProperty = Balloon.ConnectorPointProperty.AddOwner(typeof(BalloonControl));
+        public static readonly DependencyProperty ConnectorOffsetProperty = Balloon.ConnectorOffsetProperty.AddOwner(typeof(BalloonControl));
 
         public static readonly DependencyProperty ConnectorAngleProperty = Balloon.ConnectorAngleProperty.AddOwner(typeof(BalloonControl));
 
@@ -31,54 +31,54 @@ namespace Gu.Wpf.Geometry
 
         public CornerRadius CornerRadius
         {
-            get { return (CornerRadius)GetValue(CornerRadiusProperty); }
-            set { SetValue(CornerRadiusProperty, value); }
+            get { return (CornerRadius)this.GetValue(CornerRadiusProperty); }
+            set { this.SetValue(CornerRadiusProperty, value); }
         }
 
-        public Point ConnectorPoint
+        public Vector ConnectorOffset
         {
-            get { return (Point)GetValue(ConnectorPointProperty); }
-            set { SetValue(ConnectorPointProperty, value); }
+            get { return (Vector)this.GetValue(ConnectorOffsetProperty); }
+            set { this.SetValue(ConnectorOffsetProperty, value); }
         }
 
         public double ConnectorAngle
         {
-            get { return (double)GetValue(ConnectorAngleProperty); }
-            set { SetValue(ConnectorAngleProperty, value); }
+            get { return (double)this.GetValue(ConnectorAngleProperty); }
+            set { this.SetValue(ConnectorAngleProperty, value); }
         }
 
         public UIElement PlacementTarget
         {
-            get { return (UIElement)GetValue(PlacementTargetProperty); }
-            set { SetValue(PlacementTargetProperty, value); }
+            get { return (UIElement)this.GetValue(PlacementTargetProperty); }
+            set { this.SetValue(PlacementTargetProperty, value); }
         }
 
         public PlacementOptions PlacementOptions
         {
-            get { return (PlacementOptions)GetValue(PlacementOptionsProperty); }
-            set { SetValue(PlacementOptionsProperty, value); }
+            get { return (PlacementOptions)this.GetValue(PlacementOptionsProperty); }
+            set { this.SetValue(PlacementOptionsProperty, value); }
         }
 
         protected virtual void OnLayoutUpdated(object _, EventArgs __)
         {
-            if (this.IsLoaded && PlacementTarget != null)
+            if (this.IsLoaded && this.PlacementTarget != null)
             {
-                var p1 = this.PointToScreen(new Point(0,0));
-                var placementRect = new Rect(new Point(0, 0), PlacementTarget.RenderSize);
-                var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
-                p2 = PlacementTarget.PointToScreen(p2);
-                var v = p2 - p1;
-                if (PlacementOptions != null && PlacementOptions.Offset != 0)
-                {
-                    var uv = v.Normalized();
-                    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
-                    v = v + offset;
-                }
-                SetCurrentValue(ConnectorPointProperty, new Point(v.X, v.Y));
+                //var p1 = this.PointToScreen(new Point(0, 0));
+                //var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
+                //var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                //p2 = this.PlacementTarget.PointToScreen(p2);
+                //var v = p2 - p1;
+                //if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
+                //{
+                //    var uv = v.Normalized();
+                //    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
+                //    v = v + offset;
+                //}
+                //this.SetCurrentValue(ConnectorOffsetProperty, new Point(v.X, v.Y));
             }
             else
             {
-                InvalidateProperty(ConnectorPointProperty);
+                this.InvalidateProperty(ConnectorOffsetProperty);
             }
         }
 
@@ -95,8 +95,8 @@ namespace Gu.Wpf.Geometry
             // unsubscribing and subscribing here to have only one subscription
             balloonControl.LayoutUpdated -= balloonControl.OnLayoutUpdated;
             balloonControl.LayoutUpdated += balloonControl.OnLayoutUpdated;
-            WeakEventManager<UIElement, EventArgs>.RemoveHandler((UIElement)e.OldValue, nameof(UIElement.LayoutUpdated), balloonControl.OnLayoutUpdated);
-            WeakEventManager<UIElement, EventArgs>.AddHandler((UIElement)e.NewValue, nameof(UIElement.LayoutUpdated), balloonControl.OnLayoutUpdated);
+            WeakEventManager<UIElement, EventArgs>.RemoveHandler((UIElement)e.OldValue, nameof(LayoutUpdated), balloonControl.OnLayoutUpdated);
+            WeakEventManager<UIElement, EventArgs>.AddHandler((UIElement)e.NewValue, nameof(LayoutUpdated), balloonControl.OnLayoutUpdated);
         }
     }
 }

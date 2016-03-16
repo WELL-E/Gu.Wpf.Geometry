@@ -25,8 +25,8 @@
         {
             var l1 = l1s.AsLine();
             var l2 = l2s.AsLine();
-            var actual = Line.IntersectionPoint(l1, l2);
-            Assert.Equal(expected, actual.ToDebugString("F0"));
+            var actual = l1.IntersectWith(l2);
+            Assert.Equal(expected, actual.Value.ToDebugString("F0"));
         }
     }
 }

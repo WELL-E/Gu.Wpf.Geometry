@@ -38,21 +38,18 @@
             try
             {
                 var args = text.Split(SeparatorChars, StringSplitOptions.RemoveEmptyEntries);
-                if (args.Length == 0 || args.Length > 3)
+                switch (args.Length)
                 {
-                    throw FormatException(text);
-                }
-                if (args.Length == 1)
-                {
-                    return ParseSingle(args[0], text);
-                }
-
-                if (args.Length == 2)
-                {
-                    return ParseTwo(args[0], args[1], text);
+                    case 1:
+                        return ParseOne(args[0], text);
+                    case 2:
+                        return ParseTwo(args[0], args[1], text);
+                    case 3:
+                        return ParseThree(args[0], args[1], args[2], text);
+                    default:
+                        throw FormatException(text);
                 }
 
-                return ParseThree(args[0], args[1], args[2], text);
             }
             catch (Exception e)
             {
@@ -71,27 +68,36 @@
             throw new NotSupportedException();
         }
 
-        private PlacementOptions ParseTwo(string arg1, string arg2, string text)
+        private static PlacementOptions ParseOne(string arg, string text)
+        {
+            if (string.Equals(arg, nameof(HorizontalPlacement.Center), StringComparison.OrdinalIgnoreCase))
+            {
+                return PlacementOptions.Center;
+            }
+
+            throw FormatException(text);
+        }
+
+        private static PlacementOptions ParseTwo(string arg1, string arg2, string text)
         {
             double offset;
             if (double.TryParse(arg2, out offset))
             {
-                var options = ParseSingle(arg1, text);
-                options.Offset = offset;
-                return options;
+                var options = ParseOne(arg1, text);
+                return new PlacementOptions(options.Horizontal, options.Vertical, offset);
             }
 
             HorizontalPlacement horizontal;
             VerticalPlacement vertical;
             if (TryParsePlacements(arg1, arg2, out horizontal, out vertical))
             {
-                return new PlacementOptions { HorizontalPlacement = horizontal, VerticalPlacement = vertical };
+                return new PlacementOptions(horizontal, vertical, 0);
             }
 
             throw FormatException(text);
         }
 
-        private PlacementOptions ParseThree(string arg1, string arg2, string arg3, string text)
+        private static PlacementOptions ParseThree(string arg1, string arg2, string arg3, string text)
         {
             try
             {
@@ -100,12 +106,7 @@
                 VerticalPlacement vertical;
                 if (TryParsePlacements(arg1, arg2, out horizontal, out vertical))
                 {
-                    return new PlacementOptions
-                    {
-                        HorizontalPlacement = horizontal,
-                        VerticalPlacement = vertical,
-                        Offset = offset
-                    };
+                    return new PlacementOptions(horizontal, vertical, offset);
                 }
 
                 throw FormatException(text);
@@ -116,27 +117,14 @@
             }
         }
 
-        private bool TryParsePlacements(string arg1, string arg2, out HorizontalPlacement horizontal, out VerticalPlacement vertical)
+
+        private static bool TryParsePlacements(string arg1, string arg2, out HorizontalPlacement horizontal, out VerticalPlacement vertical)
         {
-            horizontal = default(HorizontalPlacement);
             vertical = default(VerticalPlacement);
             return (Enum.TryParse(arg1, true, out horizontal) &&
                     Enum.TryParse(arg2, true, out vertical)) ||
                    (Enum.TryParse(arg2, true, out horizontal) &&
                     Enum.TryParse(arg1, true, out vertical));
-        }
-        private static PlacementOptions ParseSingle(string arg, string text)
-        {
-            if (string.Equals(arg, nameof(HorizontalPlacement.Center), StringComparison.OrdinalIgnoreCase))
-            {
-                return new PlacementOptions
-                {
-                    HorizontalPlacement = HorizontalPlacement.Center,
-                    VerticalPlacement = VerticalPlacement.Center
-                };
-            }
-
-            throw FormatException(text);
         }
 
         private static FormatException FormatException(string text, Exception inner = null)

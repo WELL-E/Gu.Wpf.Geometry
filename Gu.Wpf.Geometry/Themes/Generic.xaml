@@ -10,7 +10,7 @@
                 <ControlTemplate TargetType="{x:Type local:BalloonControl}">
                     <Grid>
                         <local:Balloon ConnectorAngle="{TemplateBinding ConnectorAngle}"
-                                       ConnectorPoint="{TemplateBinding ConnectorPoint}"
+                                       ConnectorOffset="{TemplateBinding ConnectorOffset}"
                                        CornerRadius="{TemplateBinding CornerRadius}"
                                        Stroke="{TemplateBinding BorderBrush}"
                                        StrokeThickness="{Binding BorderThickness.Left,
