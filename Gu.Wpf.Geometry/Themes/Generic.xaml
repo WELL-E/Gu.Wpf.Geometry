@@ -9,8 +9,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:BalloonControl}">
                     <Grid>
-                        <local:Balloon ConnectorAngle="15"
-                                       ConnectorPoint="15,-15"
+                        <local:Balloon ConnectorAngle="{TemplateBinding ConnectorAngle}"
+                                       ConnectorPoint="{TemplateBinding ConnectorPoint}"
                                        CornerRadius="{TemplateBinding CornerRadius}"
                                        Stroke="{TemplateBinding BorderBrush}"
                                        StrokeThickness="{Binding BorderThickness.Left,
