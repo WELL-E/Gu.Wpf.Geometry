@@ -8,23 +8,14 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="ShapeStyle"
-               TargetType="{x:Type Shape}">
-            <Setter Property="Width" Value="100" />
-            <Setter Property="Height" Value="120" />
-            <Setter Property="StrokeThickness" Value="5" />
-            <Setter Property="Opacity" Value="0.5" />
-            <Setter Property="Stretch" Value="None" />
-        </Style>
-    </UserControl.Resources>
     <Grid>
-        <Rectangle Fill="Yellow"
-                   Style="{StaticResource ShapeStyle}" />
-        <geometry:Balloon ConnectorPoint="10,-30"
-                          ConnectorAngle="10"
-                          CornerRadius="10,20,30,40"
+        <Rectangle Height="100"
+                   Fill="Yellow" />
+        <geometry:Balloon Height="100"
+                          ConnectorAngle="30"
+                          ConnectorPoint="5,-10"
+                          CornerRadius="5"
                           Stroke="CornflowerBlue"
-                          Style="{StaticResource ShapeStyle}" />
+                          StrokeThickness="5" />
     </Grid>
 </UserControl>
