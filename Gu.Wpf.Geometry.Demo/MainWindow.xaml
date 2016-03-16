@@ -13,6 +13,10 @@
             <local:PathDebugView />
         </TabItem>
 
+        <TabItem Header="ballon control">
+            <local:BalloonControlView />
+        </TabItem>
+
         <TabItem Header="ballon">
             <local:BalloonView />
         </TabItem>

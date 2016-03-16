@@ -64,6 +64,16 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry DefiningGeometry => this.boxGeometry ?? Geometry.Empty;
 
+        protected override Size MeasureOverride(Size constraint)
+        {
+            return new Size(StrokeThickness, StrokeThickness);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            return finalSize;
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             var pen = this.penCache.GetPen(this.Stroke, this.StrokeThickness);

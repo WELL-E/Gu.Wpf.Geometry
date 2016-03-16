@@ -8,30 +8,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:BalloonControl}">
                     <Grid>
-                        <Path Stroke="{TemplateBinding BorderBrush}"
-                                  StrokeThickness="{Binding BorderThickness.Left,
-                                                            RelativeSource={RelativeSource TemplatedParent}}">
-                            <Path.Data>
-                                <CombinedGeometry GeometryCombineMode="Union">
-                                    <CombinedGeometry.Geometry1>
-                                        <PathGeometry>
-                                            <PathGeometry.Figures>
-                                                <PathFigure IsClosed="True"
-                                                                StartPoint="20,10">
-                                                    <LineSegment Point="20,0" />
-                                                    <LineSegment Point="25,10" />
-                                                </PathFigure>
-                                            </PathGeometry.Figures>
-                                        </PathGeometry>
-                                    </CombinedGeometry.Geometry1>
-                                    <CombinedGeometry.Geometry2>
-                                        <RectangleGeometry RadiusX="5"
-                                                           RadiusY="5"
-                                                           Rect="0,10,100,50" />
-                                    </CombinedGeometry.Geometry2>
-                                </CombinedGeometry>
-                            </Path.Data>
-                        </Path>
+                        <local:Balloon ConnectorAngle="15"
+                                       ConnectorPoint="15,-15"
+                                       CornerRadius="5"
+                                       Stroke="{TemplateBinding BorderBrush}"
+                                       StrokeThickness="{Binding BorderThickness.Left,
+                                                                 RelativeSource={RelativeSource TemplatedParent}}" />
                         <ContentPresenter x:Name="ContentPresenter"
                                           Margin="{TemplateBinding BorderThickness}" />
                     </Grid>
