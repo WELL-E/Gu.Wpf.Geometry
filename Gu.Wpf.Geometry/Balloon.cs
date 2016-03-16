@@ -1,5 +1,6 @@
 namespace Gu.Wpf.Geometry
 {
+    using System.Diagnostics;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Shapes;
@@ -61,23 +62,7 @@ namespace Gu.Wpf.Geometry
             set { SetValue(ConnectorAngleProperty, value); }
         }
 
-        protected override Geometry DefiningGeometry
-        {
-            get
-            {
-                if (this.boxGeometry == null)
-                {
-                    this.UpdateCachedGeometries();
-                }
-
-                return this.boxGeometry;
-            }
-        }
-
-        protected override Size MeasureOverride(Size constraint)
-        {
-            return constraint;
-        }
+        protected override Geometry DefiningGeometry => this.boxGeometry ?? Geometry.Empty;
 
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -85,10 +70,25 @@ namespace Gu.Wpf.Geometry
             drawingContext.DrawGeometry(Fill, pen, this.balloonGeometry);
         }
 
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            UpdateCachedGeometries();
+            this.InvalidateVisual();
+        }
+
         protected virtual void UpdateCachedGeometries()
         {
-            this.boxGeometry = CreateBoxGeometry(this.DesiredSize);
-            this.connectorGeometry = CreateConnectorGeometry(this.DesiredSize);
+            if (this.RenderSize == Size.Empty)
+            {
+                this.boxGeometry = Geometry.Empty;
+                this.connectorGeometry = Geometry.Empty;
+                this.balloonGeometry = Geometry.Empty;
+                return;
+            }
+
+            this.boxGeometry = CreateBoxGeometry(this.RenderSize);
+            this.connectorGeometry = CreateConnectorGeometry(this.RenderSize, this.boxGeometry);
             this.balloonGeometry = CreateGeometry(this.boxGeometry, this.connectorGeometry);
         }
 
@@ -124,7 +124,7 @@ namespace Gu.Wpf.Geometry
             return geometry;
         }
 
-        protected virtual Geometry CreateConnectorGeometry(Size size)
+        protected virtual Geometry CreateConnectorGeometry(Size size, Geometry box)
         {
             var width = size.Width - StrokeThickness;
             var height = size.Height - StrokeThickness;
