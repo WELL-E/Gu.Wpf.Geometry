@@ -1,6 +1,5 @@
 namespace Gu.Wpf.Geometry
 {
-    using System;
     using System.Diagnostics;
     using System.Windows;
     using System.Windows.Media;
@@ -150,11 +149,16 @@ namespace Gu.Wpf.Geometry
             var length = width * width + height * height;
             var rectangle = new Rect(new Point(0, 0), size);
             rectangle.Inflate(-StrokeThickness, -StrokeThickness);
+            if (rectangle.IsEmpty)
+            {
+                return Geometry.Empty;
+            }
+
             var line = new Line(mp, mp + length * direction);
             var ip = line.IntersectWith(rectangle);
             if (ip == null)
             {
-                Debug.Assert(false, "This should not happen");
+                Debug.Assert(false, $"Line {line} does not intersect rectangle {rectangle}");
                 return Geometry.Empty;
             }
 

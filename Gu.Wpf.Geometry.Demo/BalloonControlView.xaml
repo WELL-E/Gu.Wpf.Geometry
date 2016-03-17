@@ -35,7 +35,7 @@
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center"
                                  ConnectorAngle="25"
-                                 CornerRadius="5"
+                                 CornerRadius="15"
                                  PlacementOptions="Bottom, Center"
                                  PlacementTarget="{Binding ElementName=Target}">
             <Grid Margin="5">
