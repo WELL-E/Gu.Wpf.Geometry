@@ -5,7 +5,13 @@
 
     public class NullablePointComparer : IEqualityComparer<Point?>
     {
-        public static readonly NullablePointComparer Default = new NullablePointComparer();
+        private readonly int digits;
+        public static readonly NullablePointComparer Default = new NullablePointComparer(2);
+
+        public NullablePointComparer(int digits)
+        {
+            this.digits = digits;
+        }
 
         public bool Equals(Point? x, Point? y)
         {
@@ -19,12 +25,12 @@
                 return false;
             }
 
-            return PointComparer.Default.Equals(x.Value, y.Value);
+            return PointComparer.Default.Equals(x.Value, y.Value, this.digits);
         }
 
         public int GetHashCode(Point? obj)
         {
-            return obj?.Round().GetHashCode() ?? 0;
+            return obj?.Round(digits).GetHashCode() ?? 0;
         }
     }
 }

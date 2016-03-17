@@ -12,6 +12,17 @@
             return v.RotateRadians(degrees * DegToRad);
         }
 
+        internal static double DotProdcut(this Vector v, Vector other)
+        {
+            return Vector.Multiply(v, other);
+        }
+
+        internal static Vector ProjectOn(this Vector v, Vector other)
+        {
+            var dp = v.DotProdcut(other);
+            return dp * other;
+        }
+
         internal static Vector RotateRadians(this Vector v, double radians)
         {
             var ca = Math.Cos(radians);
@@ -31,6 +42,11 @@
             var negated = new Vector(v.X, v.Y);
             negated.Negate();
             return negated;
+        }
+
+        internal static Vector Round(this Vector v, int digits = 0)
+        {
+            return new Vector(Math.Round(v.X, digits), Math.Round(v.Y, digits));
         }
     }
 }

@@ -77,7 +77,7 @@ namespace Gu.Wpf.Geometry
                     }
 
                     var mp = rect.MidPoint();
-                    var ip = new Line(mp, tp).IntersectWith(rect);
+                    var ip = new Line(mp, tp).ClosestIntersection(rect);
                     if (ip == null)
                     {
                         throw new InvalidOperationException("bug in the library");

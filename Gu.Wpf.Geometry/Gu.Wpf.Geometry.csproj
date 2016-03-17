@@ -46,6 +46,8 @@
     <Compile Include="GradientPath+GradientGeometry.cs" />
     <Compile Include="GradientPath.cs" />
     <Compile Include="HorizontalPlacement.cs" />
+    <Compile Include="Internals\Circle.cs" />
+    <Compile Include="Internals\CornerRadiusExt.cs" />
     <Compile Include="Internals\GradientStopCollectionExt.cs" />
     <Compile Include="Internals\Line.cs" />
     <Compile Include="Internals\LineExt.cs" />

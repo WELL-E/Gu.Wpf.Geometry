@@ -21,7 +21,7 @@
         <geometry:Balloon Grid.Row="1"
                           Grid.Column="1"
                           ConnectorAngle="45"
-                          ConnectorOffset="0,10"
+                          ConnectorOffset="-10,-8"
                           CornerRadius="10"
                           Stroke="CornflowerBlue"
                           StrokeThickness="4" />

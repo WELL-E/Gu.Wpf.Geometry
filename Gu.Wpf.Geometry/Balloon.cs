@@ -156,19 +156,21 @@ namespace Gu.Wpf.Geometry
             }
 
             var line = new Line(mp, mp + length * direction);
-            var ip = line.IntersectWith(rectangle);
+            var ip = line.ClosestIntersection(rectangle);
             if (ip == null)
             {
                 Debug.Assert(false, $"Line {line} does not intersect rectangle {rectangle}");
                 return Geometry.Empty;
             }
 
+            var cr = this.AdjustedCornerRadius();
             var sp = ip.Value + this.ConnectorOffset;
+            line = new Line(sp, mp + length * direction.Negated());
             var p1 = line.RotateAroundStartPoint(this.ConnectorAngle / 2)
-                         .IntersectWith(rectangle) ??
+                         .ClosestIntersection(rectangle, cr) ??
                          ip;
             var p2 = line.RotateAroundStartPoint(-this.ConnectorAngle / 2)
-                         .IntersectWith(rectangle) ??
+                         .ClosestIntersection(rectangle, cr) ??
                          ip;
 
             var geometry = new StreamGeometry();
@@ -210,7 +212,8 @@ namespace Gu.Wpf.Geometry
 
         private CornerRadius AdjustedCornerRadius()
         {
-            var cr = CornerRadius;
+            var cr = CornerRadius.InflateBy(-StrokeThickness / 2)
+                                 .WithMin(0);
             var left = cr.TopLeft + cr.BottomLeft;
             var right = cr.TopRight + cr.BottomRight;
             var top = cr.TopLeft + cr.TopRight;
@@ -225,7 +228,7 @@ namespace Gu.Wpf.Geometry
 
             var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
                                   Math.Min(this.ActualHeight / left, this.ActualHeight / right));
-            return new CornerRadius(factor * cr.TopLeft, factor * cr.TopRight, factor * cr.BottomRight, factor * cr.BottomLeft);
+            return cr.ScaleBy(factor).InflateBy(-StrokeThickness / 2).WithMin(0);
         }
 
         private class PenCache

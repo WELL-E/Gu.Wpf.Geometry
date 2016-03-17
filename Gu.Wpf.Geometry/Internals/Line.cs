@@ -140,7 +140,46 @@
             return IntersectionPoint(this, other, mustBeBetweenStartAndEnd);
         }
 
-        internal Point? IntersectWith(Rect rectangle)
+        internal Point? ClosestIntersection(Rect rectangle, CornerRadius cornerRadius)
+        {
+            var ip = this.ClosestIntersection(rectangle);
+            if (ip == null)
+            {
+                return null;
+            }
+
+            if (ip.Value.DistanceTo(rectangle.TopLeft) < cornerRadius.TopLeft)
+            {
+                var r = cornerRadius.TopLeft;
+                var center = rectangle.TopLeft + new Vector(r, r);
+                return new Circle(center, r).ClosestIntersection(this);
+            }
+
+            if (ip.Value.DistanceTo(rectangle.TopRight) < cornerRadius.TopRight)
+            {
+                var r = cornerRadius.TopRight;
+                var center = rectangle.TopRight + new Vector(-r, r);
+                return new Circle(center, r).ClosestIntersection(this);
+            }
+
+            if (ip.Value.DistanceTo(rectangle.BottomRight) < cornerRadius.BottomRight)
+            {
+                var r = cornerRadius.BottomRight;
+                var center = rectangle.BottomRight + new Vector(-r, -r);
+                return new Circle(center, r).ClosestIntersection(this);
+            }
+
+            if (ip.Value.DistanceTo(rectangle.BottomLeft) < cornerRadius.BottomLeft)
+            {
+                var r = cornerRadius.BottomLeft;
+                var center = rectangle.BottomLeft + new Vector(r, -r);
+                return new Circle(center, r).ClosestIntersection(this);
+            }
+
+            return ip;
+        }
+
+        internal Point? ClosestIntersection(Rect rectangle)
         {
             Point ip;
             if (rectangle.Contains(this.StartPoint))

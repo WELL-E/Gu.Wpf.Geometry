@@ -1,9 +1,7 @@
 ﻿namespace Gu.Wpf.Geometry.Tests
 {
-    using System.Globalization;
     using System.Windows;
     using Xunit;
-    using Xunit.Sdk;
 
     public class LineTests
     {
@@ -47,9 +45,9 @@
             var l = Line.Parse(ls);
             var rect = Rect.Parse(rs);
             var expected = Point.Parse(eps);
-            var actual = l.IntersectWith(rect);
+            var actual = l.ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
-            actual = new Line(l.EndPoint, l.StartPoint).IntersectWith(rect);
+            actual = new Line(l.EndPoint, l.StartPoint).ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
         }
     }
