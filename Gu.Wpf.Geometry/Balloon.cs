@@ -137,7 +137,7 @@ namespace Gu.Wpf.Geometry
 
         protected virtual Geometry CreateConnectorGeometry(Size size)
         {
-            if (this.ConnectorOffset == default(Vector))
+            if (this.ConnectorOffset == default(Vector) || size.IsEmpty)
             {
                 return Geometry.Empty;
             }
@@ -146,11 +146,11 @@ namespace Gu.Wpf.Geometry
             var height = size.Height - this.StrokeThickness;
             var geometry = new StreamGeometry();
             var mp = new Point(width / 2, height / 2);
-
             var direction = this.ConnectorOffset.Normalized();
             var length = width * width + height * height;
-            var line = new Line(mp, mp + length * direction);
             var rectangle = new Rect(new Point(0, 0), size);
+            rectangle.Inflate(-StrokeThickness, -StrokeThickness);
+            var line = new Line(mp, mp + length * direction);
             var ip = line.IntersectWith(rectangle);
             if (ip == null)
             {

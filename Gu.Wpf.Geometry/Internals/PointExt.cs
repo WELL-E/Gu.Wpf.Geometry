@@ -8,7 +8,7 @@
     {
         internal static Point WithOffset(this Point p, Vector direction, double distance)
         {
-            return p + distance * direction;
+            return p + distance*direction;
         }
 
         internal static Point WithOffset(this Point p, double x, double y)
@@ -26,10 +26,14 @@
             return new Point(Math.Round(p.X, 0), Math.Round(p.Y, 0));
         }
 
+        internal static string ToDebugString(this Point? p, string format = "F1")
+        {
+            return p == null ? "null" : p.Value.ToDebugString(format);
+        }
+
         internal static string ToDebugString(this Point p, string format = "F1")
         {
             return $"{p.X.ToString(format, CultureInfo.InvariantCulture)},{p.Y.ToString(format, CultureInfo.InvariantCulture)}";
         }
-
     }
 }

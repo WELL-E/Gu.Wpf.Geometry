@@ -50,6 +50,7 @@
     <Compile Include="Internals\Line.cs" />
     <Compile Include="Internals\PathFigureExt.cs" />
     <Compile Include="Internals\PointExt.cs" />
+    <Compile Include="Internals\RectExt.cs" />
     <Compile Include="Internals\SizeExt.cs" />
     <Compile Include="Internals\StreamGeometryContextExt.cs" />
     <Compile Include="PlacementOptions.cs" />

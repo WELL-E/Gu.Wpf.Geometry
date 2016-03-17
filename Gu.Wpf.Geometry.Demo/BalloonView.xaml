@@ -20,8 +20,8 @@
         </Grid.ColumnDefinitions>
         <geometry:Balloon Grid.Row="1"
                           Grid.Column="1"
-                          ConnectorAngle="15"
-                          ConnectorOffset="-100,-100"
+                          ConnectorAngle="45"
+                          ConnectorOffset="0,10"
                           CornerRadius="16"
                           Stroke="CornflowerBlue"
                           StrokeThickness="4" />

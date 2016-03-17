@@ -35,7 +35,6 @@
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center"
                                  ConnectorAngle="25"
-                                 ConnectorOffset="35,-10"
                                  CornerRadius="5"
                                  PlacementOptions="Top, Left"
                                  PlacementTarget="{Binding ElementName=Target}">

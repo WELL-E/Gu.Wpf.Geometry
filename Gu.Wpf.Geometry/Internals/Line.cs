@@ -62,8 +62,14 @@
 
         internal bool IsPointOnLine(Point p)
         {
-            var v = this.StartPoint - p;
-            if (Math.Abs(Vector.AngleBetween(this.Direction, v)) > 1E-3)
+            if (this.StartPoint.DistanceTo(p) < 1E-3)
+            {
+                return true;
+            }
+
+            var v = p - this.StartPoint;
+            var angleBetween = Vector.AngleBetween(this.Direction, v);
+            if (Math.Abs(angleBetween) > 1E-3)
             {
                 return false;
             }
@@ -99,15 +105,56 @@
         internal Point? IntersectWith(Rect rectangle)
         {
             Point ip;
-            if (this.TryFindIntersectionPoint(new Line(rectangle.TopLeft, rectangle.TopRight), out ip) ||
-               this.TryFindIntersectionPoint(new Line(rectangle.TopRight, rectangle.BottomRight), out ip) ||
-               this.TryFindIntersectionPoint(new Line(rectangle.BottomRight, rectangle.BottomLeft), out ip) ||
-               this.TryFindIntersectionPoint(new Line(rectangle.BottomLeft, rectangle.TopLeft), out ip))
+            if (rectangle.Contains(this.StartPoint))
             {
-                return ip;
+                if (rectangle.TopLine().TryFindIntersectionPoint(this, out ip) ||
+                    rectangle.RightLine().TryFindIntersectionPoint(this, out ip) ||
+                    rectangle.BottomLine().TryFindIntersectionPoint(this, out ip) ||
+                    rectangle.LeftLine().TryFindIntersectionPoint(this, out ip))
+                {
+                    return ip;
+                }
+
+                return null;
             }
 
-            return null;
+            if (this.StartPoint.X < 0)
+            {
+                if (rectangle.LeftLine().TryFindIntersectionPoint(this, out ip))
+                {
+                    return ip;
+                }
+            }
+
+            if (this.StartPoint.X > rectangle.Width)
+            {
+                if (rectangle.RightLine().TryFindIntersectionPoint(this, out ip))
+                {
+                    return ip;
+                }
+            }
+
+            if (this.StartPoint.Y < 0)
+            {
+                if (rectangle.TopLine().TryFindIntersectionPoint(this, out ip))
+                {
+                    return ip;
+                }
+
+                return null;
+            }
+
+            if (this.StartPoint.Y > rectangle.Height)
+            {
+                if (rectangle.BottomLine().TryFindIntersectionPoint(this, out ip))
+                {
+                    return ip;
+                }
+
+                return null;
+            }
+
+            throw new InvalidOperationException("Bug in the library");
         }
 
         internal bool TryFindIntersectionPoint(Line other, out Point intersectionPoint)

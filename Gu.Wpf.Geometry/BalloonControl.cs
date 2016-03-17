@@ -61,22 +61,23 @@ namespace Gu.Wpf.Geometry
 
         protected virtual void OnLayoutUpdated(object _, EventArgs __)
         {
-            if (this.IsLoaded && this.PlacementTarget != null)
+            if (this.IsLoaded && this.IsVisible && this.PlacementTarget != null)
             {
-                //var p1 = this.PointToScreen(new Point(0, 0));
-                //var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
-                //var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
-                //p2 = this.PlacementTarget.PointToScreen(p2);
-                //var v = p2 - p1;
-                //if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
-                //{
-                //    var uv = v.Normalized();
-                //    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
-                //    v = v + offset;
-                //}
-                //this.SetCurrentValue(ConnectorOffsetProperty, new Point(v.X, v.Y));
+                var p1 = this.PointToScreen(new Point(0, 0));
+                var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
+                var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                p2 = this.PlacementTarget.PointToScreen(p2);
+                var v = p2 - p1;
+                if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
+                {
+                    var uv = v.Normalized();
+                    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
+                    v = v + offset;
+                }
+
+                this.SetCurrentValue(ConnectorOffsetProperty, v);
             }
-            else
+            else if (this.PlacementTarget == null)
             {
                 this.InvalidateProperty(ConnectorOffsetProperty);
             }

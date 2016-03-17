@@ -1,8 +1,8 @@
 ﻿namespace Gu.Wpf.Geometry.Tests
 {
-    using Gu.Wpf.Geometry;
-
+    using System.Windows;
     using Xunit;
+    using Xunit.Sdk;
 
     public class LineTests
     {
@@ -20,13 +20,24 @@
         }
 
         [Theory]
+        [InlineData("-1,0; 1,0", "0,-1; 0,1", "0,0")]
+        [InlineData("-1,0; 0,0", "0,-1; 0,1", "0,0")]
+        [InlineData("-1,0; 0,0", "0,-1; 0,0", "0,0")]
+        [InlineData("-1,0; 0,0", "0,0; 0,1", "0,0")]
         [InlineData("1,1; 1,2", "0,3; -1,3", "1,3")]
         public void IntersectionPoint(string l1s, string l2s, string expected)
         {
             var l1 = l1s.AsLine();
             var l2 = l2s.AsLine();
             var actual = l1.IntersectWith(l2);
-            Assert.Equal(expected, actual.Value.ToDebugString("F0"));
+            Assert.Equal(expected, actual.ToDebugString("F0"));
+        }
+
+        [Theory]
+        [InlineData("1,1; 1,2", "0,3; -1,3", "1,3")]
+        public void TheoryMethodName(string ls, string rs, string expected)
+        {
+            Assert.True(false);
         }
     }
 }
