@@ -166,19 +166,15 @@ namespace Gu.Wpf.Geometry
             var cr = this.AdjustedCornerRadius();
             var sp = ip.Value + this.ConnectorOffset;
             line = new Line(sp, mp + length * direction.Negated());
-            var p1 = line.RotateAroundStartPoint(this.ConnectorAngle / 2)
-                         .ClosestIntersection(rectangle, cr) ??
-                         ip;
-            var p2 = line.RotateAroundStartPoint(-this.ConnectorAngle / 2)
-                         .ClosestIntersection(rectangle, cr) ??
-                         ip;
+            var p1 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
+            var p2 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
 
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
                 context.BeginFigure(sp, true, true);
-                context.LineTo(p1.Value, true, true);
-                context.LineTo(p2.Value, true, true);
+                context.LineTo(p1, true, true);
+                context.LineTo(p2, true, true);
             }
 
             geometry.Freeze();
@@ -229,6 +225,83 @@ namespace Gu.Wpf.Geometry
             var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
                                   Math.Min(this.ActualHeight / left, this.ActualHeight / right));
             return cr.ScaleBy(factor).InflateBy(-this.StrokeThickness / 2).WithMin(0);
+        }
+
+        private static class ConnectorPoint
+        {
+            internal static Point Find(Line line, double angle, Rect rectangle, CornerRadius cornerRadius)
+            {
+                var l = line.RotateAroundStartPoint(angle);
+                var ip = l.ClosestIntersection(rectangle);
+                if (ip == null)
+                {
+                    return FindTangentPoint(line, rectangle, cornerRadius);
+                }
+
+                var radius = ClosestRadius(line, rectangle, cornerRadius);
+                var toCenter = line.StartPoint.VectorTo(radius.Center);
+                var perp = radius.Radius * toCenter.Rotate(90).Normalized();
+                var toTangent = line.StartPoint.VectorTo(radius.Center + perp);
+                var treshold = Math.Abs(toCenter.AngleTo(toTangent));
+                if (Math.Abs(angle) >= treshold)
+                {
+                    return ip.Value;
+                }
+
+                ip = radius.ClosestIntersection(l);
+                if (ip == null)
+                {
+                    throw new InvalidOperationException("Could not find intersection with radius");
+                }
+                return ip.Value;
+            }
+
+            private static Point FindTangentPoint(Line line, Rect rectangle, CornerRadius cornerRadius)
+            {
+                var radius = ClosestRadius(line, rectangle, cornerRadius);
+                var toCenter = line.StartPoint.VectorTo(radius.Center);
+                if (radius.Radius == 0)
+                {
+                    return line.StartPoint + toCenter;
+                }
+
+                if (line.Direction.AngleTo(toCenter) > 0)
+                {
+                    var perp = radius.Radius * toCenter.Rotate(90).Normalized();
+                    return line.StartPoint + toCenter + perp;
+                }
+                else
+                {
+                    var perp = radius.Radius * toCenter.Rotate(-90).Normalized();
+                    return line.StartPoint + toCenter + perp;
+                }
+            }
+
+            private static Circle ClosestRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
+            {
+                if (line.Direction.X > 0 && line.Direction.Y < 0)
+                {
+                    var r = cornerRadius.TopLeft;
+                    return new Circle(rectangle.TopLeft.WithOffset(r, r), r);
+                }
+                if (line.Direction.X < 0 && line.Direction.Y < 0)
+                {
+                    var r = cornerRadius.TopRight;
+                    return new Circle(rectangle.TopRight.WithOffset(-r, r), r);
+                }
+                if (line.Direction.X < 0 && line.Direction.Y > 0)
+                {
+                    var r = cornerRadius.BottomRight;
+                    return new Circle(rectangle.BottomRight.WithOffset(-r, -r), r);
+                }
+                if (line.Direction.X > 0 && line.Direction.Y > 0)
+                {
+                    var r = cornerRadius.BottomLeft;
+                    return new Circle(rectangle.BottomLeft.WithOffset(r, -r), r);
+                }
+
+                throw new InvalidOperationException("Could not find corner radius");
+            }
         }
 
         private class PenCache

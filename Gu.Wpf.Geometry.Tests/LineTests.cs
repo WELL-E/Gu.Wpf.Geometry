@@ -50,25 +50,5 @@
             actual = new Line(l.EndPoint, l.StartPoint).ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
         }
-
-        [Theory]
-        [InlineData("-1,-1", "0,0,10,10", "0 0 0 0", "0,0")]
-        [InlineData("-1,-1", "0,0,10,10", "5 5 0 0", "1.46,1.46")]
-        [InlineData("-1,0", "0,0,10,10", "5 5 0 0", "1.159,1.799")]
-        [InlineData("-10,0", "0,0,10,10", "5 5 0 0", "0.257,3.419")]
-        [InlineData("-10,5", "0,0,10,10", "5 5 0 0", "0,5")]
-        [InlineData("11,-1", "0,0,10,10", "0 0 0 0", "10,0")]
-        public void IntersectWithRoundedRectangle(string sps, string rs, string cs, string eps)
-        {
-            var sp = Point.Parse(sps);
-            var rect = Rect.Parse(rs);
-            var l = new Line(sp, rect.MidPoint());
-            var corners = (CornerRadius)new CornerRadiusConverter().ConvertFrom(cs);
-            var expected = Point.Parse(eps);
-            var actual = l.ClosestIntersection(rect, corners);
-            Assert.Equal(expected, actual, NullablePointComparer.Default);
-            //actual = new Line(l.EndPoint, l.StartPoint).ClosestIntersection(rect);
-            //Assert.Equal(expected, actual, NullablePointComparer.Default);
-        }
     }
 }

@@ -7,6 +7,11 @@
     {
         private const double DegToRad = Math.PI / 180;
 
+        internal static double AngleTo(this Vector v, Vector other)
+        {
+            return Vector.AngleBetween(v, other);
+        }
+
         internal static Vector Rotate(this Vector v, double degrees)
         {
             return v.RotateRadians(degrees * DegToRad);

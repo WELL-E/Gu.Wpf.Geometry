@@ -6,29 +6,34 @@
 
     internal static class PointExt
     {
-        internal static Point WithOffset(this Point p, Vector direction, double distance)
+        internal static Point WithOffset(this Point self, Vector direction, double distance)
         {
-            return p + distance * direction;
+            return self + distance * direction;
         }
 
-        internal static Point WithOffset(this Point p, double x, double y)
+        internal static Point WithOffset(this Point self, double x, double y)
         {
-            return new Point(p.X + x, p.Y + y);
+            return new Point(self.X + x, self.Y + y);
         }
 
-        internal static double DistanceTo(this Point p, Point other)
+        internal static double DistanceTo(this Point self, Point other)
         {
-            return (p - other).Length;
+            return (self - other).Length;
         }
 
-        internal static Point Round(this Point p, int digits = 0)
+        internal static Point Round(this Point self, int digits = 0)
         {
-            return new Point(Math.Round(p.X, digits), Math.Round(p.Y, digits));
+            return new Point(Math.Round(self.X, digits), Math.Round(self.Y, digits));
         }
 
-        internal static Point Closest(this Point p, Point first, Point other)
+        internal static Vector VectorTo(this Point self, Point other)
         {
-            return p.DistanceTo(first) < p.DistanceTo(other) ? first : other;
+            return other - self;
+        }
+
+        internal static Point Closest(this Point self, Point first, Point other)
+        {
+            return self.DistanceTo(first) < self.DistanceTo(other) ? first : other;
         }
 
         internal static Point MidPoint(Point p1, Point p2)
@@ -36,14 +41,14 @@
             return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
         }
 
-        internal static string ToString(this Point? p, string format = "F1")
+        internal static string ToString(this Point? self, string format = "F1")
         {
-            return p == null ? "null" : p.Value.ToString(format);
+            return self == null ? "null" : self.Value.ToString(format);
         }
 
-        internal static string ToString(this Point p, string format = "F1")
+        internal static string ToString(this Point self, string format = "F1")
         {
-            return $"{p.X.ToString(format, CultureInfo.InvariantCulture)},{p.Y.ToString(format, CultureInfo.InvariantCulture)}";
+            return $"{self.X.ToString(format, CultureInfo.InvariantCulture)},{self.Y.ToString(format, CultureInfo.InvariantCulture)}";
         }
     }
 }

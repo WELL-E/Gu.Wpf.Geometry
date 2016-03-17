@@ -60,6 +60,7 @@
     <Compile Include="PlacementOptionsConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Internals\VectorExt.cs" />
+    <Compile Include="Internals\Sign.cs" />
     <Compile Include="VerticalPlacement.cs" />
   </ItemGroup>
   <ItemGroup>
