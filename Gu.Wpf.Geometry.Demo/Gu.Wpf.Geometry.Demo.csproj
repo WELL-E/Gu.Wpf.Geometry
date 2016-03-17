@@ -59,8 +59,11 @@
     <Compile Include="BalloonView.xaml.cs">
       <DependentUpon>BalloonView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BoundingBoxView.xaml.cs">
+    <Compile Include="DebugViews\BoundingBoxView.xaml.cs">
       <DependentUpon>BoundingBoxView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DebugViews\IntersectionView.xaml.cs">
+      <DependentUpon>IntersectionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="PathDebugView.xaml.cs">
       <DependentUpon>PathDebugView.xaml</DependentUpon>
@@ -80,11 +83,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="BoundingBoxView.xaml">
+    <Page Include="DebugViews\BoundingBoxView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dot.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DebugViews\IntersectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
