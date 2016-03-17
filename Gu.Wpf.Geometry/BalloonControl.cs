@@ -27,6 +27,7 @@ namespace Gu.Wpf.Geometry
         static BalloonControl()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(BalloonControl), new FrameworkPropertyMetadata(typeof(BalloonControl)));
+            EventManager.RegisterClassHandler(typeof(BalloonControl), LoadedEvent, new RoutedEventHandler(OnLoaded));
         }
 
         public CornerRadius CornerRadius
@@ -63,11 +64,24 @@ namespace Gu.Wpf.Geometry
         {
             if (this.IsLoaded && this.IsVisible && this.PlacementTarget != null)
             {
-                var p1 = this.PointToScreen(new Point(0, 0));
+                var rect = new Rect(new Point(0, 0), this.RenderSize).ToScreen(this);
                 var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
-                var p2 = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
-                p2 = this.PlacementTarget.PointToScreen(p2);
-                var v = p2 - p1;
+                var tp = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                tp = this.PlacementTarget.PointToScreen(tp);
+                if (rect.Contains(tp))
+                {
+                    this.SetCurrentValue(ConnectorOffsetProperty, new Vector(0, 0));
+                    return;
+                }
+
+                var mp = rect.MidPoint();
+                var ip = new Line(mp, tp).IntersectWith(rect);
+                if (ip == null)
+                {
+                    throw new InvalidOperationException("bug in the library");
+                }
+
+                var v = tp - ip.Value;
                 if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
                 {
                     var uv = v.Normalized();
@@ -88,6 +102,11 @@ namespace Gu.Wpf.Geometry
             this.UpdateConnectorOffset();
         }
 
+        protected virtual void OnLoaded()
+        {
+            UpdateConnectorOffset();
+        }
+
         private static void OnPlacementOptionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var balloonControl = (BalloonControl)d;
@@ -103,6 +122,11 @@ namespace Gu.Wpf.Geometry
             balloonControl.LayoutUpdated += balloonControl.OnLayoutUpdated;
             WeakEventManager<UIElement, EventArgs>.RemoveHandler((UIElement)e.OldValue, nameof(LayoutUpdated), balloonControl.OnLayoutUpdated);
             WeakEventManager<UIElement, EventArgs>.AddHandler((UIElement)e.NewValue, nameof(LayoutUpdated), balloonControl.OnLayoutUpdated);
+        }
+
+        private static void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            ((BalloonControl)sender).OnLoaded();
         }
     }
 }

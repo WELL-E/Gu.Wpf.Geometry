@@ -32,7 +32,7 @@
                         case HorizontalPlacement.Left:
                             return rect.TopLeft;
                         case HorizontalPlacement.Center:
-                            return MidPoint(rect.TopLeft, rect.TopRight);
+                            return PointExt.MidPoint(rect.TopLeft, rect.TopRight);
                         case HorizontalPlacement.Right:
                             return rect.TopRight;
                         default:
@@ -42,11 +42,11 @@
                     switch (this.Horizontal)
                     {
                         case HorizontalPlacement.Left:
-                            return MidPoint(rect.BottomLeft, rect.TopLeft);
+                            return PointExt.MidPoint(rect.BottomLeft, rect.TopLeft);
                         case HorizontalPlacement.Center:
-                            return MidPoint(rect.TopLeft, rect.BottomRight);
+                            return PointExt.MidPoint(rect.TopLeft, rect.BottomRight);
                         case HorizontalPlacement.Right:
-                            return MidPoint(rect.BottomRight, rect.TopRight);
+                            return PointExt.MidPoint(rect.BottomRight, rect.TopRight);
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -56,7 +56,7 @@
                         case HorizontalPlacement.Left:
                             return rect.BottomLeft;
                         case HorizontalPlacement.Center:
-                            return MidPoint(rect.BottomLeft, rect.BottomRight);
+                            return PointExt.MidPoint(rect.BottomLeft, rect.BottomRight);
                         case HorizontalPlacement.Right:
                             return rect.BottomRight;
                         default:
@@ -65,11 +65,6 @@
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        internal static Point MidPoint(Point p1, Point p2)
-        {
-            return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
         }
     }
 }

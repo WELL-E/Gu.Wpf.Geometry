@@ -26,6 +26,11 @@
             return new Point(Math.Round(p.X, digits), Math.Round(p.Y, digits));
         }
 
+        internal static Point MidPoint(Point p1, Point p2)
+        {
+            return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
+        }
+
         internal static string ToString(this Point? p, string format = "F1")
         {
             return p == null ? "null" : p.Value.ToString(format);
