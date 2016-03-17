@@ -42,8 +42,8 @@
         {
             var v = this.EndPoint - this.StartPoint;
             v = v.Rotate(angleInDegrees);
-            var ep = StartPoint + v;
-            return new Line(StartPoint, ep);
+            var ep = this.StartPoint + v;
+            return new Line(this.StartPoint, ep);
         }
 
         public Vector PerpendicularDirection
@@ -57,7 +57,7 @@
 
         public override string ToString()
         {
-            return ToString(string.Empty);
+            return this.ToString(string.Empty);
         }
 
         public string ToString(string format)

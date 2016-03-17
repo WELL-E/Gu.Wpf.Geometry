@@ -30,7 +30,7 @@
 
         public int GetHashCode(Point? obj)
         {
-            return obj?.Round(digits).GetHashCode() ?? 0;
+            return obj?.Round(this.digits).GetHashCode() ?? 0;
         }
     }
 }

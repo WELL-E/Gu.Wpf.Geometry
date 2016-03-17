@@ -149,7 +149,7 @@ namespace Gu.Wpf.Geometry
             var direction = this.ConnectorOffset.Normalized();
             var length = width * width + height * height;
             var rectangle = new Rect(new Point(0, 0), size);
-            rectangle.Inflate(-StrokeThickness, -StrokeThickness);
+            rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
             if (rectangle.IsEmpty)
             {
                 return Geometry.Empty;
@@ -212,7 +212,7 @@ namespace Gu.Wpf.Geometry
 
         private CornerRadius AdjustedCornerRadius()
         {
-            var cr = CornerRadius.InflateBy(-StrokeThickness / 2)
+            var cr = this.CornerRadius.InflateBy(-this.StrokeThickness / 2)
                                  .WithMin(0);
             var left = cr.TopLeft + cr.BottomLeft;
             var right = cr.TopRight + cr.BottomRight;
@@ -228,7 +228,7 @@ namespace Gu.Wpf.Geometry
 
             var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
                                   Math.Min(this.ActualHeight / left, this.ActualHeight / right));
-            return cr.ScaleBy(factor).InflateBy(-StrokeThickness / 2).WithMin(0);
+            return cr.ScaleBy(factor).InflateBy(-this.StrokeThickness / 2).WithMin(0);
         }
 
         private class PenCache

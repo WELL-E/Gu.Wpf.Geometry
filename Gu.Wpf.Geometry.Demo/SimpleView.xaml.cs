@@ -22,7 +22,7 @@ namespace Gu.Wpf.Geometry.Demo
     {
         public SimpleView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

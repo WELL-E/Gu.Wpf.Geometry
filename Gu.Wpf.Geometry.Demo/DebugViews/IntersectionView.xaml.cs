@@ -9,7 +9,7 @@ namespace Gu.Wpf.Geometry.Demo
     {
         public IntersectionView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

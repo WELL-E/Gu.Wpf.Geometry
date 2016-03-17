@@ -62,7 +62,7 @@ namespace Gu.Wpf.Geometry
 
         protected virtual void UpdateConnectorOffset()
         {
-            if (PlacementTarget != null)
+            if (this.PlacementTarget != null)
             {
                 if (this.IsVisible && this.PlacementTarget.IsVisible)
                 {
@@ -107,7 +107,7 @@ namespace Gu.Wpf.Geometry
 
         protected virtual void OnLoaded()
         {
-            UpdateConnectorOffset();
+            this.UpdateConnectorOffset();
         }
 
         private static void OnPlacementOptionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

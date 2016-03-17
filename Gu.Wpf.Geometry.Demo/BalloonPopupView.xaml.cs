@@ -9,7 +9,7 @@
     {
         public BalloonPopupView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

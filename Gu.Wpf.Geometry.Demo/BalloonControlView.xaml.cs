@@ -9,7 +9,7 @@
     {
         public BalloonControlView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

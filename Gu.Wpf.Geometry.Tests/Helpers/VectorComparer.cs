@@ -15,7 +15,7 @@
 
         public bool Equals(Vector x, Vector y)
         {
-            return Equals(x, y, this.digits);
+            return this.Equals(x, y, this.digits);
         }
 
         public bool Equals(Vector x, Vector y, int decimalDigits)

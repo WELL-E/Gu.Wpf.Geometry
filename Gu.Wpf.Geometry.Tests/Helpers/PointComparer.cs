@@ -15,7 +15,7 @@
 
         public bool Equals(Point x, Point y)
         {
-            return Equals(x, y, this.digits);
+            return this.Equals(x, y, this.digits);
         }
 
         public bool Equals(Point x, Point y, int decimalDigits)
