@@ -22,7 +22,7 @@
                           Grid.Column="1"
                           ConnectorAngle="45"
                           ConnectorOffset="0,10"
-                          CornerRadius="16"
+                          CornerRadius="10"
                           Stroke="CornflowerBlue"
                           StrokeThickness="4" />
     </Grid>

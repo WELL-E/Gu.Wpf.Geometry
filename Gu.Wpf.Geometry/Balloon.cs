@@ -1,5 +1,6 @@
 namespace Gu.Wpf.Geometry
 {
+    using System;
     using System.Diagnostics;
     using System.Windows;
     using System.Windows.Media;
@@ -106,30 +107,31 @@ namespace Gu.Wpf.Geometry
         {
             var width = size.Width - this.StrokeThickness;
             var height = size.Height - this.StrokeThickness;
-
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
-                var p = this.CornerRadius.TopLeft > 0
-                    ? new Point(this.CornerRadius.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
+                var cr = this.AdjustedCornerRadius();
+                var p = cr.TopLeft > 0
+                    ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
                     : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
                 context.BeginFigure(p, true, true);
-                p = p.WithOffset(width - this.CornerRadius.TopLeft - this.CornerRadius.TopRight, 0);
+                p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, this.CornerRadius.TopRight, this.CornerRadius.TopRight);
+                p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
 
-                p = p.WithOffset(0, height - this.CornerRadius.TopRight - this.CornerRadius.BottomRight);
+                p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -this.CornerRadius.BottomRight, this.CornerRadius.BottomRight);
+                p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
 
-                p = p.WithOffset(-width + this.CornerRadius.BottomRight + this.CornerRadius.BottomLeft, 0);
+                p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -this.CornerRadius.BottomLeft, -this.CornerRadius.BottomLeft);
+                p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
 
-                p = p.WithOffset(0, -height + this.CornerRadius.TopLeft + this.CornerRadius.BottomLeft);
+                p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
                 context.LineTo(p, true, true);
-                p = context.DrawCorner(p, this.CornerRadius.TopLeft, -this.CornerRadius.TopLeft);
+                p = context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
             }
+
             geometry.Freeze();
             return geometry;
         }
@@ -143,7 +145,6 @@ namespace Gu.Wpf.Geometry
 
             var width = size.Width - this.StrokeThickness;
             var height = size.Height - this.StrokeThickness;
-            var geometry = new StreamGeometry();
             var mp = new Point(width / 2, height / 2);
             var direction = this.ConnectorOffset.Normalized();
             var length = width * width + height * height;
@@ -163,15 +164,21 @@ namespace Gu.Wpf.Geometry
             }
 
             var sp = ip.Value + this.ConnectorOffset;
-            var p1 = line.RotateAroundStartPoint(this.ConnectorAngle / 2).IntersectWith(rectangle) ?? ip;
-            var p2 = line.RotateAroundStartPoint(-this.ConnectorAngle / 2).IntersectWith(rectangle) ?? ip;
+            var p1 = line.RotateAroundStartPoint(this.ConnectorAngle / 2)
+                         .IntersectWith(rectangle) ??
+                         ip;
+            var p2 = line.RotateAroundStartPoint(-this.ConnectorAngle / 2)
+                         .IntersectWith(rectangle) ??
+                         ip;
 
+            var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
                 context.BeginFigure(sp, true, true);
                 context.LineTo(p1.Value, true, true);
                 context.LineTo(p2.Value, true, true);
             }
+
             geometry.Freeze();
             return geometry;
         }
@@ -199,6 +206,26 @@ namespace Gu.Wpf.Geometry
             {
                 balloon.UpdateCachedGeometries();
             }
+        }
+
+        private CornerRadius AdjustedCornerRadius()
+        {
+            var cr = CornerRadius;
+            var left = cr.TopLeft + cr.BottomLeft;
+            var right = cr.TopRight + cr.BottomRight;
+            var top = cr.TopLeft + cr.TopRight;
+            var bottom = cr.BottomLeft + cr.BottomRight;
+            if (left < this.ActualHeight &&
+                right < this.ActualHeight &&
+                top < this.ActualWidth &&
+                bottom < this.ActualWidth)
+            {
+                return cr;
+            }
+
+            var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
+                                  Math.Min(this.ActualHeight / left, this.ActualHeight / right));
+            return new CornerRadius(factor * cr.TopLeft, factor * cr.TopRight, factor * cr.BottomRight, factor * cr.BottomLeft);
         }
 
         private class PenCache

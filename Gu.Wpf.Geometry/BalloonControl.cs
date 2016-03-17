@@ -62,36 +62,39 @@ namespace Gu.Wpf.Geometry
 
         protected virtual void UpdateConnectorOffset()
         {
-            if (this.IsLoaded && this.IsVisible && this.PlacementTarget != null)
+            if (PlacementTarget != null)
             {
-                var rect = new Rect(new Point(0, 0), this.RenderSize).ToScreen(this);
-                var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
-                var tp = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
-                tp = this.PlacementTarget.PointToScreen(tp);
-                if (rect.Contains(tp))
+                if (this.IsVisible && this.PlacementTarget.IsVisible)
                 {
-                    this.SetCurrentValue(ConnectorOffsetProperty, new Vector(0, 0));
-                    return;
-                }
+                    var rect = new Rect(new Point(0, 0), this.RenderSize).ToScreen(this);
+                    var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
+                    var tp = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                    tp = this.PlacementTarget.PointToScreen(tp);
+                    if (rect.Contains(tp))
+                    {
+                        this.SetCurrentValue(ConnectorOffsetProperty, new Vector(0, 0));
+                        return;
+                    }
 
-                var mp = rect.MidPoint();
-                var ip = new Line(mp, tp).IntersectWith(rect);
-                if (ip == null)
-                {
-                    throw new InvalidOperationException("bug in the library");
-                }
+                    var mp = rect.MidPoint();
+                    var ip = new Line(mp, tp).IntersectWith(rect);
+                    if (ip == null)
+                    {
+                        throw new InvalidOperationException("bug in the library");
+                    }
 
-                var v = tp - ip.Value;
-                if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
-                {
-                    var uv = v.Normalized();
-                    var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
-                    v = v + offset;
-                }
+                    var v = tp - ip.Value;
+                    if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
+                    {
+                        var uv = v.Normalized();
+                        var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
+                        v = v + offset;
+                    }
 
-                this.SetCurrentValue(ConnectorOffsetProperty, v);
+                    this.SetCurrentValue(ConnectorOffsetProperty, v);
+                }
             }
-            else if (this.PlacementTarget == null)
+            else
             {
                 this.InvalidateProperty(ConnectorOffsetProperty);
             }

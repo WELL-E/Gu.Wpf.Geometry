@@ -20,5 +20,9 @@
         <TabItem Header="ballon">
             <local:BalloonView />
         </TabItem>
+
+        <TabItem Header="ballon popup">
+            <local:BalloonPopupView />
+        </TabItem>
     </TabControl>
 </Window>
