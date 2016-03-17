@@ -1,5 +1,6 @@
 ﻿namespace Gu.Wpf.Geometry.Tests
 {
+    using System.Globalization;
     using System.Windows;
     using Xunit;
     using Xunit.Sdk;
@@ -21,23 +22,35 @@
 
         [Theory]
         [InlineData("-1,0; 1,0", "0,-1; 0,1", "0,0")]
+        [InlineData("-1,0; 1,0", "10,-1; 10,1", "null")]
         [InlineData("-1,0; 0,0", "0,-1; 0,1", "0,0")]
         [InlineData("-1,0; 0,0", "0,-1; 0,0", "0,0")]
         [InlineData("-1,0; 0,0", "0,0; 0,1", "0,0")]
-        [InlineData("1,1; 1,2", "0,3; -1,3", "1,3")]
+        [InlineData("1,1; 1,2", "0,3; -1,3", "null")]
         public void IntersectionPoint(string l1s, string l2s, string expected)
         {
             var l1 = l1s.AsLine();
             var l2 = l2s.AsLine();
             var actual = l1.IntersectWith(l2);
-            Assert.Equal(expected, actual.ToDebugString("F0"));
+            Assert.Equal(expected, actual.ToString("F0"));
+            actual = l2.IntersectWith(l1);
+            Assert.Equal(expected, actual.ToString("F0"));
         }
 
         [Theory]
-        [InlineData("1,1; 1,2", "0,3; -1,3", "1,3")]
-        public void TheoryMethodName(string ls, string rs, string expected)
+        [InlineData("-1,-1; 1,1", "0,0,10,10", "0,0")]
+        [InlineData("-1,0; 1,0", "0,0,10,10", "0,0")]
+        [InlineData("9,0; 11,0", "0,0,10,10", "10,0")]
+        [InlineData("0,9; 0,11", "0,0,10,10", "0,10")]
+        public void IntersectWith(string ls, string rs, string eps)
         {
-            Assert.True(false);
+            var l = Line.Parse(ls);
+            var rect = Rect.Parse(rs);
+            var expected = Point.Parse(eps);
+            var actual = l.IntersectWith(rect);
+            Assert.Equal(expected, actual, NullablePointComparer.Default);
+            actual = new Line(l.EndPoint, l.StartPoint).IntersectWith(rect);
+            Assert.Equal(expected, actual, NullablePointComparer.Default);
         }
     }
 }

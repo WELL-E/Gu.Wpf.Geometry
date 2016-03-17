@@ -6,6 +6,11 @@
     public class PointComparer : IEqualityComparer<Point>
     {
         public static readonly PointComparer Default = new PointComparer();
+
+        private PointComparer()
+        {
+        }
+
         public bool Equals(Point x, Point y)
         {
             return x.Round() == y.Round();
@@ -13,10 +18,7 @@
 
         public int GetHashCode(Point obj)
         {
-            unchecked
-            {
-                return obj.Round().GetHashCode();
-            }
+            return obj.Round().GetHashCode();
         }
     }
 }

@@ -48,6 +48,7 @@
     <Compile Include="HorizontalPlacement.cs" />
     <Compile Include="Internals\GradientStopCollectionExt.cs" />
     <Compile Include="Internals\Line.cs" />
+    <Compile Include="Internals\LineExt.cs" />
     <Compile Include="Internals\PathFigureExt.cs" />
     <Compile Include="Internals\PointExt.cs" />
     <Compile Include="Internals\RectExt.cs" />

@@ -159,14 +159,8 @@ namespace Gu.Wpf.Geometry
             }
 
             var sp = ip.Value + this.ConnectorOffset;
-            var p1 = new Line(sp,
-                              sp + length * direction.Rotate(this.ConnectorAngle / 2).Negated())
-                            .IntersectWith(rectangle) ??
-                            ip;
-            var p2 = new Line(sp,
-                              sp + length * direction.Rotate(-this.ConnectorAngle / 2).Negated())
-                            .IntersectWith(rectangle) ??
-                            ip;
+            var p1 = line.RotateAroundStartPoint(this.ConnectorAngle / 2).IntersectWith(rectangle) ?? ip;
+            var p2 = line.RotateAroundStartPoint(-this.ConnectorAngle / 2).IntersectWith(rectangle) ?? ip;
 
             using (var context = geometry.Open())
             {

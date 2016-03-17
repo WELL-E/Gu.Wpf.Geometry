@@ -43,7 +43,13 @@
                     if (i > 0)
                     {
                         var previous = result[i - 1];
-                        previous = previous.TrimOrExtendEndWith(line);
+                        var extended = previous.TrimOrExtendEndWith(line);
+                        if (extended == null)
+                        {
+                            continue;
+                        }
+
+                        previous = extended.Value;
                         result[i - 1] = previous;
                         line = new Line(previous.EndPoint, line.EndPoint);
                     }

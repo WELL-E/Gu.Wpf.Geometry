@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Windows;
 
-    [DebuggerDisplay("StartPoint: {StartPoint.ToDebugString()} EndPoint: {EndPoint.ToDebugString()}")]
+    [DebuggerDisplay("StartPoint: {StartPoint.ToString()} EndPoint: {EndPoint.ToString()}")]
     internal struct Line
     {
         public readonly Point StartPoint;
@@ -38,6 +38,14 @@
             }
         }
 
+        public Line RotateAroundStartPoint(double angleInDegrees)
+        {
+            var v = this.EndPoint - this.StartPoint;
+            v = v.Rotate(angleInDegrees);
+            var ep = StartPoint + v;
+            return new Line(StartPoint, ep);
+        }
+
         public Vector PerpendicularDirection
         {
             get
@@ -47,9 +55,27 @@
             }
         }
 
+        public override string ToString()
+        {
+            return ToString(string.Empty);
+        }
+
         public string ToString(string format)
         {
-            return $"{this.StartPoint.ToDebugString(format)}; {this.EndPoint.ToDebugString(format)}";
+            return $"{this.StartPoint.ToString(format)}; {this.EndPoint.ToString(format)}";
+        }
+
+        internal static Line Parse(string text)
+        {
+            var strings = text.Split(';');
+            if (strings.Length != 2)
+            {
+                throw new ArgumentException();
+            }
+
+            var sp = Point.Parse(strings[0]);
+            var ep = Point.Parse(strings[1]);
+            return new Line(sp, ep);
         }
 
         internal Line Offset(double distance)
@@ -74,26 +100,38 @@
                 return false;
             }
 
-            return v.Length < this.Length;
+            return v.Length <= this.Length + 1E-3;
         }
 
-        internal Line TrimOrExtendEndWith(Line other)
+        internal Line? TrimOrExtendEndWith(Line other)
         {
             if (this.EndPoint.DistanceTo(other.StartPoint) < 1e-3)
             {
                 return this;
             }
+
             var ip = IntersectionPoint(this, other, false);
+            if (ip == null)
+            {
+                return null;
+            }
+
             return new Line(this.StartPoint, ip.Value);
         }
 
-        internal Line TrimOrExtendStartWith(Line other)
+        internal Line? TrimOrExtendStartWith(Line other)
         {
             if (this.StartPoint.DistanceTo(other.EndPoint) < 1e-3)
             {
                 return this;
             }
+
             var ip = IntersectionPoint(this, other, false);
+            if (ip == null)
+            {
+                return null;
+            }
+
             return new Line(ip.Value, this.EndPoint);
         }
 
@@ -154,7 +192,7 @@
                 return null;
             }
 
-            throw new InvalidOperationException("Bug in the library");
+            return null;
         }
 
         internal bool TryFindIntersectionPoint(Line other, out Point intersectionPoint)
@@ -184,8 +222,13 @@
             var d = Perp(u, v);
             var sI = Perp(v, w) / d;
             var p = l1.StartPoint + sI * u;
-            if (mustBeBetweenStartAndEnd && !l1.IsPointOnLine(p))
+            if (mustBeBetweenStartAndEnd)
             {
+                if (l1.IsPointOnLine(p) && l2.IsPointOnLine(p))
+                {
+                    return p;
+                }
+
                 return null;
             }
 

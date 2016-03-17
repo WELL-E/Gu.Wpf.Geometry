@@ -59,7 +59,7 @@ namespace Gu.Wpf.Geometry
             set { this.SetValue(PlacementOptionsProperty, value); }
         }
 
-        protected virtual void OnLayoutUpdated(object _, EventArgs __)
+        protected virtual void UpdateConnectorOffset()
         {
             if (this.IsLoaded && this.IsVisible && this.PlacementTarget != null)
             {
@@ -83,6 +83,11 @@ namespace Gu.Wpf.Geometry
             }
         }
 
+        protected virtual void OnLayoutUpdated(object _, EventArgs __)
+        {
+            this.UpdateConnectorOffset();
+        }
+
         private static void OnPlacementOptionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var balloonControl = (BalloonControl)d;
@@ -92,7 +97,7 @@ namespace Gu.Wpf.Geometry
         private static void OnPlacementTargetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var balloonControl = (BalloonControl)d;
-            balloonControl.OnLayoutUpdated(null, null);
+            balloonControl.UpdateConnectorOffset();
             // unsubscribing and subscribing here to have only one subscription
             balloonControl.LayoutUpdated -= balloonControl.OnLayoutUpdated;
             balloonControl.LayoutUpdated += balloonControl.OnLayoutUpdated;
