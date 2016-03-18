@@ -90,24 +90,24 @@
 
         internal bool IsPointOnLine(Point p)
         {
-            if (this.StartPoint.DistanceTo(p) < 1E-3)
+            if (this.StartPoint.DistanceTo(p) < Constants.Tolerance)
             {
                 return true;
             }
 
             var v = p - this.StartPoint;
             var angleBetween = Vector.AngleBetween(this.Direction, v);
-            if (Math.Abs(angleBetween) > 1E-3)
+            if (Math.Abs(angleBetween) > Constants.Tolerance)
             {
                 return false;
             }
 
-            return v.Length <= this.Length + 1E-3;
+            return v.Length <= this.Length + Constants.Tolerance;
         }
 
         internal Line? TrimOrExtendEndWith(Line other)
         {
-            if (this.EndPoint.DistanceTo(other.StartPoint) < 1e-3)
+            if (this.EndPoint.DistanceTo(other.StartPoint) < Constants.Tolerance)
             {
                 return this;
             }
@@ -123,7 +123,7 @@
 
         internal Line? TrimOrExtendStartWith(Line other)
         {
-            if (this.StartPoint.DistanceTo(other.EndPoint) < 1e-3)
+            if (this.StartPoint.DistanceTo(other.EndPoint) < Constants.Tolerance)
             {
                 return this;
             }
@@ -144,57 +144,44 @@
 
         internal Point? ClosestIntersection(Rect rectangle)
         {
-            Point ip;
             if (rectangle.Contains(this.StartPoint))
             {
-                if (rectangle.TopLine().TryFindIntersectionPoint(this, out ip) ||
-                    rectangle.RightLine().TryFindIntersectionPoint(this, out ip) ||
-                    rectangle.BottomLine().TryFindIntersectionPoint(this, out ip) ||
-                    rectangle.LeftLine().TryFindIntersectionPoint(this, out ip))
+                switch (this.Direction.Quadrant())
                 {
-                    return ip;
+                    case Quadrant.TopLeft:
+                        return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                               IntersectionPoint(rectangle.TopLine(), this, true);
+                    case Quadrant.TopRight:
+                        return IntersectionPoint(rectangle.RightLine(), this, true) ?? 
+                               IntersectionPoint(rectangle.TopLine(), this, true);
+                    case Quadrant.BottomRight:
+                        return IntersectionPoint(rectangle.RightLine(), this, true) ??
+                               IntersectionPoint(rectangle.BottomLine(), this, true);
+                    case Quadrant.BottomLeft:
+                        return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                               IntersectionPoint(rectangle.BottomLine(), this, true);
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                return null;
             }
 
-            if (this.StartPoint.X < rectangle.TopLeft.X)
+            switch (this.Direction.Quadrant())
             {
-                if (rectangle.LeftLine().TryFindIntersectionPoint(this, out ip))
-                {
-                    return ip;
-                }
+                case Quadrant.TopLeft:
+                    return IntersectionPoint(rectangle.RightLine(), this, true) ??
+                           IntersectionPoint(rectangle.BottomLine(), this, true);
+                case Quadrant.TopRight:
+                    return IntersectionPoint(rectangle.LeftLine(), this, true) ?? 
+                           IntersectionPoint(rectangle.BottomLine(), this, true);
+                case Quadrant.BottomRight:
+                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                           IntersectionPoint(rectangle.TopLine(), this, true);
+                case Quadrant.BottomLeft:
+                    return IntersectionPoint(rectangle.RightLine(), this, true) ??
+                           IntersectionPoint(rectangle.TopLine(), this, true);
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            if (this.StartPoint.X > rectangle.TopRight.X)
-            {
-                if (rectangle.RightLine().TryFindIntersectionPoint(this, out ip))
-                {
-                    return ip;
-                }
-            }
-
-            if (this.StartPoint.Y < rectangle.TopLeft.Y)
-            {
-                if (rectangle.TopLine().TryFindIntersectionPoint(this, out ip))
-                {
-                    return ip;
-                }
-
-                return null;
-            }
-
-            if (this.StartPoint.Y > rectangle.BottomLeft.Y)
-            {
-                if (rectangle.BottomLine().TryFindIntersectionPoint(this, out ip))
-                {
-                    return ip;
-                }
-
-                return null;
-            }
-
-            return null;
         }
 
         internal double DistanceTo(Point p)

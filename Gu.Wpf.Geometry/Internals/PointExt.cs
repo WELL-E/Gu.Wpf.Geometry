@@ -34,8 +34,8 @@
         internal static Vector VectorToTangent(this Point self, Circle circle, Sign rotationDirection)
         {
             var toCenter = self.VectorTo(circle.Center);
-            var angle = rotationDirection == Sign.Positive ? 90:-90;
-            var perp = circle.Radius*toCenter.Rotate(angle).Normalized();
+            var angle = rotationDirection == Sign.Positive ? 90 : -90;
+            var perp = circle.Radius * toCenter.Rotate(angle).Normalized();
             var toTangent = self.VectorTo(circle.Center + perp);
             return toTangent;
         }
@@ -58,6 +58,11 @@
         internal static string ToString(this Point self, string format = "F1")
         {
             return $"{self.X.ToString(format, CultureInfo.InvariantCulture)},{self.Y.ToString(format, CultureInfo.InvariantCulture)}";
+        }
+
+        public static Point Closest(this Point self, Point p1, Point p2, Point p3, Point p4)
+        {
+            return self.Closest(self.Closest(p1, p2), self.Closest(p3, p4));
         }
     }
 }

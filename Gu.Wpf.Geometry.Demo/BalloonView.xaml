@@ -21,27 +21,27 @@
             </Grid.ColumnDefinitions>
 
             <geometry:BoxBalloon Grid.Row="1"
-                                       Grid.Column="1"
-                                       ConnectorAngle="45"
-                                       ConnectorOffset="-10,-0"
-                                       CornerRadius="10"
-                                       Stroke="CornflowerBlue"
-                                       StrokeThickness="4" />
+                                 Grid.Column="1"
+                                 ConnectorAngle="45"
+                                 ConnectorOffset="-10,-0"
+                                 CornerRadius="10"
+                                 Stroke="CornflowerBlue"
+                                 StrokeThickness="4" />
             <geometry:BoxBalloon Grid.Row="1"
-                                       Grid.Column="1"
-                                       ConnectorAngle="45"
-                                       PlacementTarget="{Binding ElementName=Target}"
-                                       PlacementOptions="Bottom Right"
-                                       CornerRadius="10"
-                                       Stroke="HotPink"
-                                       Margin="6"
-                                       StrokeThickness="4" />
+                                 Grid.Column="1"
+                                 Margin="6"
+                                 ConnectorAngle="45"
+                                 CornerRadius="10"
+                                 PlacementOptions="Bottom Right"
+                                 PlacementTarget="{Binding ElementName=Target}"
+                                 Stroke="HotPink"
+                                 StrokeThickness="4" />
         </Grid>
         <Rectangle x:Name="Target"
-                   Width="100"
-                   Height="10"
                    Canvas.Left="100"
                    Canvas.Top="50"
+                   Width="100"
+                   Height="10"
                    Fill="Gainsboro"
                    MouseLeftButtonDown="OnTargetMouseLeftDown" />
     </Canvas>

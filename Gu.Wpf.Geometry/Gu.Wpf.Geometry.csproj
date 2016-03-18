@@ -41,11 +41,13 @@
   <ItemGroup>
     <Compile Include="Balloon\Balloon.cs" />
     <Compile Include="Balloon\BalloonControl.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="GradientPath\GradientMode.cs" />
     <Compile Include="GradientPath\GradientPath+FigureGeometry.cs" />
     <Compile Include="GradientPath\GradientPath+GradientGeometry.cs" />
     <Compile Include="GradientPath\GradientPath.cs" />
     <Compile Include="HorizontalPlacement.cs" />
+    <Compile Include="Internals\Axis.cs" />
     <Compile Include="Internals\Circle.cs" />
     <Compile Include="Internals\CornerRadiusExt.cs" />
     <Compile Include="Internals\GradientStopCollectionExt.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="Internals\LineExt.cs" />
     <Compile Include="Internals\PathFigureExt.cs" />
     <Compile Include="Internals\PointExt.cs" />
+    <Compile Include="Internals\Quadrant.cs" />
     <Compile Include="Internals\RectExt.cs" />
     <Compile Include="Internals\SizeExt.cs" />
     <Compile Include="Internals\StreamGeometryContextExt.cs" />

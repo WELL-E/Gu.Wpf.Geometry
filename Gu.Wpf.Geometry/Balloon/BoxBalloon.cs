@@ -163,17 +163,16 @@ namespace Gu.Wpf.Geometry
                 var ip = line.ClosestIntersection(rectangle);
                 if (ip == null)
                 {
-                    var radius = FindClosestCornerRadius(line, rectangle, cornerRadius);
-                    return FindTangentPoint(line, radius);
+                    return FindTangentPoint(line, rectangle, cornerRadius);
                 }
 
-                if (IsOnCornerRadius(ip.Value, rectangle, cornerRadius))
+                Circle corner;
+                if (TryGetCorner(ip.Value, rectangle, cornerRadius, out corner))
                 {
-                    var radius = FindClosestCornerRadius(line, rectangle, cornerRadius);
-                    ip = radius.ClosestIntersection(line);
+                    ip = corner.ClosestIntersection(line);
                     if (ip == null)
                     {
-                        return FindTangentPoint(line, radius);
+                        return FindTangentPoint(line, rectangle, cornerRadius);
                     }
 
                     return ip.Value;
@@ -182,76 +181,77 @@ namespace Gu.Wpf.Geometry
                 return ip.Value;
             }
 
-            private static bool IsOnCornerRadius(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius)
+            private static bool TryGetCorner(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius, out Circle corner)
             {
-                if (intersectionPoint.DistanceTo(rectangle.TopLeft) < cornerRadius.TopLeft)
+                return TryGetCorner(intersectionPoint, rectangle.TopLeft, cornerRadius.TopLeft, CreateTopLeft, out corner) ||
+                        TryGetCorner(intersectionPoint, rectangle.TopRight, cornerRadius.TopRight, CreateTopRight, out corner) ||
+                        TryGetCorner(intersectionPoint, rectangle.BottomRight, cornerRadius.BottomRight, CreateBottomRight, out corner) ||
+                        TryGetCorner(intersectionPoint, rectangle.BottomLeft, cornerRadius.BottomLeft, CreateBottomLeft, out corner);
+            }
+
+            private static bool TryGetCorner(Point intersectionPoint, Point cornerPoint, double radius, Func<Point, double, Circle> factory, out Circle corner)
+            {
+                if (intersectionPoint.DistanceTo(cornerPoint) < radius)
                 {
+                    corner = factory(cornerPoint, radius);
                     return true;
                 }
 
-                if (intersectionPoint.DistanceTo(rectangle.TopRight) < cornerRadius.TopRight)
-                {
-                    return true;
-                }
-
-                if (intersectionPoint.DistanceTo(rectangle.BottomRight) < cornerRadius.BottomRight)
-                {
-                    return true;
-                }
-
-                if (intersectionPoint.DistanceTo(rectangle.BottomLeft) < cornerRadius.BottomLeft)
-                {
-                    return true;
-                }
-
+                corner = default(Circle);
                 return false;
             }
 
-            private static Point FindTangentPoint(Line line, Circle radius)
+            private static Point FindTangentPoint(Line line, Rect rectangle, CornerRadius cornerRadius)
             {
-                var toCenter = line.StartPoint.VectorTo(radius.Center);
-                if (radius.Radius == 0)
+                Circle corner;
+                var toMid = line.PerpendicularLineTo(rectangle.MidPoint());
+                Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
+                //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");
+                var angle = toMid.Value.Direction.AngleTo(new Vector(0, 1));
+                if (0 < angle && angle < 90)
                 {
-                    return line.StartPoint + toCenter;
+                    corner = CreateTopLeft(rectangle.TopLeft, cornerRadius.TopLeft);
                 }
-
-                if (line.Direction.AngleTo(toCenter) > 0)
+                else if (90 < angle && angle < 180)
                 {
-                    var perp = radius.Radius * toCenter.Rotate(90).Normalized();
-                    return line.StartPoint + toCenter + perp;
+                    corner = CreateBottomLeft(rectangle.BottomLeft, cornerRadius.BottomLeft);
+                }
+                else if (-90 < angle && angle < 0)
+                {
+                    corner = CreateTopRight(rectangle.TopRight, cornerRadius.TopRight);
+                }
+                else if (-180 < angle && angle < -90)
+                {
+                    corner = CreateBottomRight(rectangle.BottomRight, cornerRadius.BottomRight);
                 }
                 else
                 {
-                    var perp = radius.Radius * toCenter.Rotate(-90).Normalized();
-                    return line.StartPoint + toCenter + perp;
-                }
-            }
-
-            private static Circle FindClosestCornerRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
-            {
-                if (line.DistanceTo(rectangle.TopLeft) <= cornerRadius.TopLeft)
-                {
-                    var r = cornerRadius.TopLeft;
-                    return new Circle(rectangle.TopLeft.WithOffset(r, r), r);
-                }
-                if (line.DistanceTo(rectangle.TopRight) <= cornerRadius.TopRight)
-                {
-                    var r = cornerRadius.TopRight;
-                    return new Circle(rectangle.TopRight.WithOffset(-r, r), r);
-                }
-                if (line.DistanceTo(rectangle.BottomRight) <= cornerRadius.BottomRight)
-                {
-                    var r = cornerRadius.BottomRight;
-                    return new Circle(rectangle.BottomRight.WithOffset(-r, -r), r);
-                }
-                if (line.DistanceTo(rectangle.BottomLeft) <= cornerRadius.BottomLeft)
-                {
-                    var r = cornerRadius.BottomLeft;
-                    return new Circle(rectangle.BottomLeft.WithOffset(r, -r), r);
+                    Debug.Assert(Math.Abs(angle % 90) > Constants.Tolerance, "Expected parallel line here");
+                    return line.StartPoint.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
                 }
 
-                throw new InvalidOperationException("Could not find corner radius");
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (corner.Radius == 0)
+                {
+                    return corner.Center;
+                }
+
+                var toCenterDirection = line.StartPoint.VectorTo(corner.Center).Normalized();
+                var perpDirection = line.Direction.AngleTo(toCenterDirection) > 0
+                                        ? toCenterDirection.Rotate(90)
+                                        : toCenterDirection.Rotate(-90);
+                var perpOffset = corner.Radius * perpDirection;
+                var tangentPoint = corner.Center + perpOffset;
+                return tangentPoint;
             }
+
+            private static Circle CreateTopLeft(Point p, double r) => new Circle(p.WithOffset(r, r), r);
+
+            private static Circle CreateTopRight(Point p, double r) => new Circle(p.WithOffset(-r, r), r);
+
+            private static Circle CreateBottomRight(Point p, double r) => new Circle(p.WithOffset(-r, -r), r);
+
+            private static Circle CreateBottomLeft(Point p, double r) => new Circle(p.WithOffset(r, -r), r);
         }
     }
 }

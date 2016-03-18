@@ -8,6 +8,39 @@
     {
         private const double DegToRad = Math.PI / 180;
 
+        internal static Quadrant Quadrant(this Vector v)
+        {
+            if (v.X >= 0)
+            {
+                return v.Y >= 0
+                           ? Geometry.Quadrant.TopRight
+                           : Geometry.Quadrant.BottomRight;
+            }
+
+            return v.Y >= 0
+                       ? Geometry.Quadrant.TopLeft
+                       : Geometry.Quadrant.BottomLeft;
+        }
+
+        internal static Axis? Axis(this Vector v, double tolerance = Constants.Tolerance)
+        {
+            if (Math.Abs(v.X) < tolerance)
+            {
+                return v.Y > 0
+                           ? Geometry.Axis.PositiveY
+                           : Geometry.Axis.NegativeY;
+            }
+
+            if (Math.Abs(v.Y) < tolerance)
+            {
+                return v.X > 0
+                           ? Geometry.Axis.PositiveX
+                           : Geometry.Axis.NegativeX;
+            }
+
+            return null;
+        }
+
         internal static double AngleTo(this Vector v, Vector other)
         {
             return Vector.AngleBetween(v, other);

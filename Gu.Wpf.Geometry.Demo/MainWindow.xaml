@@ -18,7 +18,7 @@
         </TabItem>
 
         <TabItem Header="ballon">
-            <local:BalloonView />
+            <local:BalloonView Margin="100" />
         </TabItem>
 
         <TabItem Header="ballon popup">
