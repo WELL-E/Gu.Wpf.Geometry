@@ -7,23 +7,42 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100" />
-            <RowDefinition Height="100" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100" />
-            <ColumnDefinition Width="100" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <geometry:Balloon Grid.Row="1"
-                          Grid.Column="1"
-                          ConnectorAngle="45"
-                          ConnectorOffset="-10,-8"
-                          CornerRadius="10"
-                          Stroke="CornflowerBlue"
-                          StrokeThickness="4" />
-    </Grid>
+    <Canvas>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="100" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <geometry:BoxBalloon Grid.Row="1"
+                                       Grid.Column="1"
+                                       ConnectorAngle="45"
+                                       ConnectorOffset="-10,-0"
+                                       CornerRadius="10"
+                                       Stroke="CornflowerBlue"
+                                       StrokeThickness="4" />
+            <geometry:BoxBalloon Grid.Row="1"
+                                       Grid.Column="1"
+                                       ConnectorAngle="45"
+                                       PlacementTarget="{Binding ElementName=Target}"
+                                       PlacementOptions="Bottom Right"
+                                       CornerRadius="10"
+                                       Stroke="HotPink"
+                                       Margin="6"
+                                       StrokeThickness="4" />
+        </Grid>
+        <Rectangle x:Name="Target"
+                   Width="100"
+                   Height="10"
+                   Canvas.Left="100"
+                   Canvas.Top="50"
+                   Fill="Gainsboro"
+                   MouseLeftButtonDown="OnTargetMouseLeftDown" />
+    </Canvas>
 </UserControl>

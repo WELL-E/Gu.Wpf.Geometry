@@ -4,106 +4,50 @@ namespace Gu.Wpf.Geometry
     using System.Diagnostics;
     using System.Windows;
     using System.Windows.Media;
-    using System.Windows.Shapes;
 
-    public class Balloon : Shape
+    public class BoxBalloon : Balloon
     {
-        public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
-            "CornerRadius",
-            typeof(CornerRadius),
-            typeof(Balloon),
-            new FrameworkPropertyMetadata(
-                default(CornerRadius),
-                FrameworkPropertyMetadataOptions.AffectsRender,
-                OnCornerRadiusChanged));
-
-        public static readonly DependencyProperty ConnectorOffsetProperty = DependencyProperty.Register(
-            "ConnectorOffset",
-            typeof(Vector),
-            typeof(Balloon),
-            new FrameworkPropertyMetadata(
-                default(Vector),
-                FrameworkPropertyMetadataOptions.AffectsRender,
-                OnConnectorChanged));
-
-        public static readonly DependencyProperty ConnectorAngleProperty = DependencyProperty.Register(
-            "ConnectorAngle",
-            typeof(double),
-            typeof(Balloon),
-            new FrameworkPropertyMetadata(
-                15.0,
-                FrameworkPropertyMetadataOptions.AffectsRender,
-                OnConnectorChanged));
-
-        private readonly PenCache penCache = new PenCache();
-        private Geometry balloonGeometry;
-        private Geometry boxGeometry;
-        private Geometry connectorGeometry;
-
-        static Balloon()
+        protected override void UpdateConnectorOffset()
         {
-            StretchProperty.OverrideMetadata(typeof(Balloon), new FrameworkPropertyMetadata(Stretch.Fill));
-        }
-
-        public CornerRadius CornerRadius
-        {
-            get { return (CornerRadius)this.GetValue(CornerRadiusProperty); }
-            set { this.SetValue(CornerRadiusProperty, value); }
-        }
-
-        public Vector ConnectorOffset
-        {
-            get { return (Vector)this.GetValue(ConnectorOffsetProperty); }
-            set { this.SetValue(ConnectorOffsetProperty, value); }
-        }
-
-        public double ConnectorAngle
-        {
-            get { return (double)this.GetValue(ConnectorAngleProperty); }
-            set { this.SetValue(ConnectorAngleProperty, value); }
-        }
-
-        protected override Geometry DefiningGeometry => this.boxGeometry ?? Geometry.Empty;
-
-        protected override Size MeasureOverride(Size constraint)
-        {
-            return new Size(this.StrokeThickness, this.StrokeThickness);
-        }
-
-        protected override Size ArrangeOverride(Size finalSize)
-        {
-            return finalSize;
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            var pen = this.penCache.GetPen(this.Stroke, this.StrokeThickness);
-            drawingContext.DrawGeometry(this.Fill, pen, this.balloonGeometry);
-        }
-
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        {
-            base.OnRenderSizeChanged(sizeInfo);
-            this.UpdateCachedGeometries();
-            this.InvalidateVisual();
-        }
-
-        protected virtual void UpdateCachedGeometries()
-        {
-            if (this.RenderSize == Size.Empty)
+            if (this.PlacementTarget != null)
             {
-                this.boxGeometry = Geometry.Empty;
-                this.connectorGeometry = Geometry.Empty;
-                this.balloonGeometry = Geometry.Empty;
-                return;
-            }
+                if (this.IsVisible && this.PlacementTarget.IsVisible)
+                {
+                    var rect = new Rect(new Point(0, 0), this.RenderSize).ToScreen(this);
+                    var placementRect = new Rect(new Point(0, 0), this.PlacementTarget.RenderSize);
+                    var tp = this.PlacementOptions?.GetPoint(placementRect) ?? new Point(0, 0);
+                    tp = this.PlacementTarget.PointToScreen(tp);
+                    if (rect.Contains(tp))
+                    {
+                        this.SetCurrentValue(ConnectorOffsetProperty, new Vector(0, 0));
+                        return;
+                    }
 
-            this.boxGeometry = this.CreateBoxGeometry(this.RenderSize);
-            this.connectorGeometry = this.CreateConnectorGeometry(this.RenderSize);
-            this.balloonGeometry = this.CreateGeometry(this.boxGeometry, this.connectorGeometry);
+                    var mp = rect.MidPoint();
+                    var ip = new Line(mp, tp).ClosestIntersection(rect);
+                    if (ip == null)
+                    {
+                        throw new InvalidOperationException("bug in the library");
+                    }
+
+                    var v = tp - ip.Value;
+                    if (this.PlacementOptions != null && this.PlacementOptions.Offset != 0)
+                    {
+                        var uv = v.Normalized();
+                        var offset = Vector.Multiply(this.PlacementOptions.Offset, uv);
+                        v = v + offset;
+                    }
+
+                    this.SetCurrentValue(ConnectorOffsetProperty, v);
+                }
+            }
+            else
+            {
+                this.InvalidateProperty(ConnectorOffsetProperty);
+            }
         }
 
-        protected virtual Geometry CreateBoxGeometry(Size size)
+        protected override Geometry CreateBoxGeometry(Size size)
         {
             var width = size.Width - this.StrokeThickness;
             var height = size.Height - this.StrokeThickness;
@@ -136,9 +80,16 @@ namespace Gu.Wpf.Geometry
             return geometry;
         }
 
-        protected virtual Geometry CreateConnectorGeometry(Size size)
+        protected override Geometry CreateConnectorGeometry(Size size)
         {
             if (this.ConnectorOffset == default(Vector) || size.IsEmpty)
+            {
+                return Geometry.Empty;
+            }
+
+            var rectangle = new Rect(new Point(0, 0), size);
+            rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
+            if (rectangle.IsEmpty)
             {
                 return Geometry.Empty;
             }
@@ -148,14 +99,8 @@ namespace Gu.Wpf.Geometry
             var mp = new Point(width / 2, height / 2);
             var direction = this.ConnectorOffset.Normalized();
             var length = width * width + height * height;
-            var rectangle = new Rect(new Point(0, 0), size);
-            rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
-            if (rectangle.IsEmpty)
-            {
-                return Geometry.Empty;
-            }
-
             var line = new Line(mp, mp + length * direction);
+
             var ip = line.ClosestIntersection(rectangle);
             if (ip == null)
             {
@@ -200,34 +145,10 @@ namespace Gu.Wpf.Geometry
             var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
                                   Math.Min(this.ActualHeight / left, this.ActualHeight / right));
             return cr.ScaleBy(factor)
-                     .InflateBy(-this.StrokeThickness/2)
+                     .InflateBy(-this.StrokeThickness / 2)
                      .WithMin(0);
         }
 
-        protected virtual Geometry CreateGeometry(Geometry boxGeometry, Geometry connectorGeometry)
-        {
-            var ballonGeometry = new CombinedGeometry(GeometryCombineMode.Union, boxGeometry, connectorGeometry);
-            ballonGeometry.Freeze();
-            return ballonGeometry;
-        }
-
-        private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var balloon = (Balloon)d;
-            if (balloon.IsInitialized)
-            {
-                balloon.UpdateCachedGeometries();
-            }
-        }
-
-        private static void OnConnectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var balloon = (Balloon)d;
-            if (balloon.IsInitialized)
-            {
-                balloon.UpdateCachedGeometries();
-            }
-        }
 
         private static class ConnectorPoint
         {
@@ -250,12 +171,12 @@ namespace Gu.Wpf.Geometry
                 {
                     var radius = FindClosestCornerRadius(line, rectangle, cornerRadius);
                     ip = radius.ClosestIntersection(line);
-                    if (ip != null)
+                    if (ip == null)
                     {
-                        return ip.Value;
+                        return FindTangentPoint(line, radius);
                     }
 
-                    throw new InvalidOperationException("Could not find intersection with radius");
+                    return ip.Value;
                 }
 
                 return ip.Value;
@@ -308,48 +229,28 @@ namespace Gu.Wpf.Geometry
 
             private static Circle FindClosestCornerRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
             {
-                if (line.Direction.X > 0 && line.Direction.Y > 0)
+                if (line.DistanceTo(rectangle.TopLeft) <= cornerRadius.TopLeft)
                 {
                     var r = cornerRadius.TopLeft;
                     return new Circle(rectangle.TopLeft.WithOffset(r, r), r);
                 }
-                if (line.Direction.X < 0 && line.Direction.Y > 0)
+                if (line.DistanceTo(rectangle.TopRight) <= cornerRadius.TopRight)
                 {
                     var r = cornerRadius.TopRight;
                     return new Circle(rectangle.TopRight.WithOffset(-r, r), r);
                 }
-                if (line.Direction.X < 0 && line.Direction.Y < 0)
+                if (line.DistanceTo(rectangle.BottomRight) <= cornerRadius.BottomRight)
                 {
                     var r = cornerRadius.BottomRight;
                     return new Circle(rectangle.BottomRight.WithOffset(-r, -r), r);
                 }
-                if (line.Direction.X > 0 && line.Direction.Y < 0)
+                if (line.DistanceTo(rectangle.BottomLeft) <= cornerRadius.BottomLeft)
                 {
                     var r = cornerRadius.BottomLeft;
                     return new Circle(rectangle.BottomLeft.WithOffset(r, -r), r);
                 }
 
                 throw new InvalidOperationException("Could not find corner radius");
-            }
-        }
-
-        private class PenCache
-        {
-            private Brush brush;
-            private double strokeThickness;
-            private Pen pen;
-
-            public Pen GetPen(Brush brush, double strokeThickness)
-            {
-                if (this.brush == brush && this.strokeThickness == strokeThickness)
-                {
-                    return this.pen;
-                }
-
-                this.brush = brush;
-                this.strokeThickness = strokeThickness;
-                this.pen = new Pen(brush, strokeThickness);
-                return this.pen;
             }
         }
     }

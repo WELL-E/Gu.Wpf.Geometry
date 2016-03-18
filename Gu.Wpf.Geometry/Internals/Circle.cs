@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Windows;
 
-    [DebuggerDisplay("{Center.ToString()}, Radius: {Radius}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal struct Circle
     {
         internal readonly Point Center;
@@ -15,6 +15,8 @@
             this.Center = center;
             this.Radius = radius;
         }
+
+        private string DebuggerDisplay => $"{this.Center.ToString("F1")} radius: {this.Radius.ToString("F1")}";
 
         internal static Circle Parse(string text)
         {
@@ -32,19 +34,19 @@
         internal Point? ClosestIntersection(Line line)
         {
             var perp = line.PerpendicularLineTo(this.Center);
-            var pl = perp.Length;
-            if (pl < 1E-3)
+            if (perp == null)
             {
                 return this.Center - this.Radius * line.Direction;
             }
 
+            var pl = perp.Value.Length;
             if (pl > this.Radius)
             {
                 return null;
             }
 
             var tangentLength = Math.Sqrt(this.Radius * this.Radius - pl * pl);
-            return perp.StartPoint - tangentLength * line.Direction;
+            return perp.Value.StartPoint - tangentLength * line.Direction;
         }
     }
 }

@@ -1,10 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-
-namespace Gu.Wpf.Geometry.Demo
+﻿namespace Gu.Wpf.Geometry.Demo
 {
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+
     /// <summary>
     /// Interaction logic for Dot.xaml
     /// </summary>
@@ -27,8 +26,7 @@ namespace Gu.Wpf.Geometry.Demo
 
         public Point Center
         {
-            set {
-                this.SetValue(CenterProperty, value); }
+            set { this.SetValue(CenterProperty, value); }
             get { return (Point)this.GetValue(CenterProperty); }
         }
 
@@ -50,7 +48,7 @@ namespace Gu.Wpf.Geometry.Demo
             }
 
             var pos = args.GetPosition(this);
-            var offset = pos - this.dragStartPos;
+            var offset = pos - this.mouseDragStart;
             var center = this.dragStartPos + offset;
             this.SetCurrentValue(CenterProperty, center);
         }

@@ -1,6 +1,7 @@
 ﻿namespace Gu.Wpf.Geometry
 {
     using System;
+    using System.Globalization;
     using System.Windows;
 
     internal static class VectorExt
@@ -52,6 +53,16 @@
         internal static Vector Round(this Vector v, int digits = 0)
         {
             return new Vector(Math.Round(v.X, digits), Math.Round(v.Y, digits));
+        }
+
+        internal static string ToString(this Vector? self, string format = "F1")
+        {
+            return self == null ? "null" : self.Value.ToString(format);
+        }
+
+        internal static string ToString(this Vector self, string format = "F1")
+        {
+            return $"{self.X.ToString(format, CultureInfo.InvariantCulture)},{self.Y.ToString(format, CultureInfo.InvariantCulture)}";
         }
     }
 }

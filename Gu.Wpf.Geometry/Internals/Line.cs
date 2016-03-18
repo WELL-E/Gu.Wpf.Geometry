@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Windows;
 
-    [DebuggerDisplay("{StartPoint.ToString()} -> {EndPoint.ToString()}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal struct Line
     {
         public readonly Point StartPoint;
@@ -37,6 +37,8 @@
                 return v;
             }
         }
+
+        private string DebuggerDisplay => $"{this.StartPoint.ToString("F1")} -> {this.EndPoint.ToString("F1")} length: {this.Length.ToString("F1")}";
 
         public Line RotateAroundStartPoint(double angleInDegrees)
         {
@@ -156,7 +158,7 @@
                 return null;
             }
 
-            if (this.StartPoint.X < 0)
+            if (this.StartPoint.X < rectangle.TopLeft.X)
             {
                 if (rectangle.LeftLine().TryFindIntersectionPoint(this, out ip))
                 {
@@ -164,7 +166,7 @@
                 }
             }
 
-            if (this.StartPoint.X > rectangle.Width)
+            if (this.StartPoint.X > rectangle.TopRight.X)
             {
                 if (rectangle.RightLine().TryFindIntersectionPoint(this, out ip))
                 {
@@ -172,7 +174,7 @@
                 }
             }
 
-            if (this.StartPoint.Y < 0)
+            if (this.StartPoint.Y < rectangle.TopLeft.Y)
             {
                 if (rectangle.TopLine().TryFindIntersectionPoint(this, out ip))
                 {
@@ -182,7 +184,7 @@
                 return null;
             }
 
-            if (this.StartPoint.Y > rectangle.Height)
+            if (this.StartPoint.Y > rectangle.BottomLeft.Y)
             {
                 if (rectangle.BottomLine().TryFindIntersectionPoint(this, out ip))
                 {
@@ -195,12 +197,24 @@
             return null;
         }
 
-
-        internal Line PerpendicularLineTo(Point p)
+        internal double DistanceTo(Point p)
         {
             var toPoint = this.StartPoint.VectorTo(p);
             var dotProdcut = toPoint.DotProdcut(this.Direction);
-            var startPoint = this.StartPoint + dotProdcut*this.Direction;
+            var pointOnLine = this.StartPoint + dotProdcut * this.Direction;
+            return pointOnLine.DistanceTo(p);
+        }
+
+        internal Line? PerpendicularLineTo(Point p)
+        {
+            if (this.IsPointOnLine(p))
+            {
+                return null;
+            }
+
+            var toPoint = this.StartPoint.VectorTo(p);
+            var dotProdcut = toPoint.DotProdcut(this.Direction);
+            var startPoint = this.StartPoint + dotProdcut * this.Direction;
             return new Line(startPoint, p);
         }
 
