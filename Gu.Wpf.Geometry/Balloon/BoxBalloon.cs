@@ -184,9 +184,9 @@ namespace Gu.Wpf.Geometry
             private static bool TryGetCorner(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius, out Circle corner)
             {
                 return TryGetCorner(intersectionPoint, rectangle.TopLeft, cornerRadius.TopLeft, CreateTopLeft, out corner) ||
-                        TryGetCorner(intersectionPoint, rectangle.TopRight, cornerRadius.TopRight, CreateTopRight, out corner) ||
-                        TryGetCorner(intersectionPoint, rectangle.BottomRight, cornerRadius.BottomRight, CreateBottomRight, out corner) ||
-                        TryGetCorner(intersectionPoint, rectangle.BottomLeft, cornerRadius.BottomLeft, CreateBottomLeft, out corner);
+                       TryGetCorner(intersectionPoint, rectangle.TopRight, cornerRadius.TopRight, CreateTopRight, out corner) ||
+                       TryGetCorner(intersectionPoint, rectangle.BottomRight, cornerRadius.BottomRight, CreateBottomRight, out corner) ||
+                       TryGetCorner(intersectionPoint, rectangle.BottomLeft, cornerRadius.BottomLeft, CreateBottomLeft, out corner);
             }
 
             private static bool TryGetCorner(Point intersectionPoint, Point cornerPoint, double radius, Func<Point, double, Circle> factory, out Circle corner)
@@ -207,6 +207,20 @@ namespace Gu.Wpf.Geometry
                 var toMid = line.PerpendicularLineTo(rectangle.MidPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
                 //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");
+                switch (toMid.Value.Direction.Quadrant())
+                {
+                    kasgfkjsfhg
+                    case Quadrant.TopLeft:
+                        break;
+                    case Quadrant.TopRight:
+                        break;
+                    case Quadrant.BottomRight:
+                        break;
+                    case Quadrant.BottomLeft:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
                 var angle = toMid.Value.Direction.AngleTo(new Vector(0, 1));
                 if (0 < angle && angle < 90)
                 {
@@ -236,7 +250,8 @@ namespace Gu.Wpf.Geometry
                     return corner.Center;
                 }
 
-                var toCenterDirection = line.StartPoint.VectorTo(corner.Center).Normalized();
+                var toCenterDirection = line.StartPoint.VectorTo(corner.Center)
+                                            .Normalized();
                 var perpDirection = line.Direction.AngleTo(toCenterDirection) > 0
                                         ? toCenterDirection.Rotate(90)
                                         : toCenterDirection.Rotate(-90);

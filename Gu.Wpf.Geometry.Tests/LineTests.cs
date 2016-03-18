@@ -74,9 +74,6 @@
             var expected = eps == "null" ? (Point?)null : Point.Parse(eps);
             var actual = l.ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
-
-            //actual = new Line(l.EndPoint, l.StartPoint).ClosestIntersection(rect);
-            //Assert.Equal(expected, actual, NullablePointComparer.Default);
         }
 
         [Theory]
