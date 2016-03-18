@@ -80,6 +80,11 @@
             return new Line(sp, ep);
         }
 
+        internal Line Flip()
+        {
+            return new Line(this.EndPoint, this.StartPoint);
+        }
+
         internal Line Offset(double distance)
         {
             var v = this.PerpendicularDirection;
@@ -150,16 +155,16 @@
                 {
                     case Quadrant.TopLeft:
                         return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                               IntersectionPoint(rectangle.TopLine(), this, true);
+                               IntersectionPoint(rectangle.BottomLine(), this, true);
                     case Quadrant.TopRight:
-                        return IntersectionPoint(rectangle.RightLine(), this, true) ?? 
-                               IntersectionPoint(rectangle.TopLine(), this, true);
-                    case Quadrant.BottomRight:
                         return IntersectionPoint(rectangle.RightLine(), this, true) ??
                                IntersectionPoint(rectangle.BottomLine(), this, true);
+                    case Quadrant.BottomRight:
+                        return IntersectionPoint(rectangle.RightLine(), this, true) ??
+                               IntersectionPoint(rectangle.TopLine(), this, true);
                     case Quadrant.BottomLeft:
                         return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                               IntersectionPoint(rectangle.BottomLine(), this, true);
+                               IntersectionPoint(rectangle.TopLine(), this, true);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -169,16 +174,16 @@
             {
                 case Quadrant.TopLeft:
                     return IntersectionPoint(rectangle.RightLine(), this, true) ??
-                           IntersectionPoint(rectangle.BottomLine(), this, true);
+                           IntersectionPoint(rectangle.TopLine(), this, true);
                 case Quadrant.TopRight:
-                    return IntersectionPoint(rectangle.LeftLine(), this, true) ?? 
-                           IntersectionPoint(rectangle.BottomLine(), this, true);
-                case Quadrant.BottomRight:
                     return IntersectionPoint(rectangle.LeftLine(), this, true) ??
                            IntersectionPoint(rectangle.TopLine(), this, true);
+                case Quadrant.BottomRight:
+                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                           IntersectionPoint(rectangle.BottomLine(), this, true);
                 case Quadrant.BottomLeft:
                     return IntersectionPoint(rectangle.RightLine(), this, true) ??
-                           IntersectionPoint(rectangle.TopLine(), this, true);
+                           IntersectionPoint(rectangle.BottomLine(), this, true);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -49,7 +49,7 @@
             var actual = l.ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
 
-            actual = new Line(l.EndPoint, l.StartPoint).ClosestIntersection(rect);
+            actual = l.Flip().ClosestIntersection(rect);
             Assert.Equal(expected, actual, NullablePointComparer.Default);
 
             var l2 = l.RotateAroundStartPoint(0.01);

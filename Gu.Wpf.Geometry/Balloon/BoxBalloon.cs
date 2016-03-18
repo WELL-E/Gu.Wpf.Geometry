@@ -207,41 +207,27 @@ namespace Gu.Wpf.Geometry
                 var toMid = line.PerpendicularLineTo(rectangle.MidPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
                 //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");
+                if (toMid.Value.Direction.Axis() != null)
+                {
+                    return line.StartPoint.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
+                }
+
                 switch (toMid.Value.Direction.Quadrant())
                 {
-                    kasgfkjsfhg
                     case Quadrant.TopLeft:
+                        corner = CreateTopLeft(rectangle.TopLeft, cornerRadius.TopLeft);
                         break;
                     case Quadrant.TopRight:
+                        corner = CreateTopRight(rectangle.TopRight, cornerRadius.TopRight);
                         break;
                     case Quadrant.BottomRight:
+                        corner = CreateBottomRight(rectangle.BottomRight, cornerRadius.BottomRight);
                         break;
                     case Quadrant.BottomLeft:
+                        corner = CreateBottomLeft(rectangle.BottomLeft, cornerRadius.BottomLeft);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
-                }
-                var angle = toMid.Value.Direction.AngleTo(new Vector(0, 1));
-                if (0 < angle && angle < 90)
-                {
-                    corner = CreateTopLeft(rectangle.TopLeft, cornerRadius.TopLeft);
-                }
-                else if (90 < angle && angle < 180)
-                {
-                    corner = CreateBottomLeft(rectangle.BottomLeft, cornerRadius.BottomLeft);
-                }
-                else if (-90 < angle && angle < 0)
-                {
-                    corner = CreateTopRight(rectangle.TopRight, cornerRadius.TopRight);
-                }
-                else if (-180 < angle && angle < -90)
-                {
-                    corner = CreateBottomRight(rectangle.BottomRight, cornerRadius.BottomRight);
-                }
-                else
-                {
-                    Debug.Assert(Math.Abs(angle % 90) > Constants.Tolerance, "Expected parallel line here");
-                    return line.StartPoint.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
                 }
 
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
