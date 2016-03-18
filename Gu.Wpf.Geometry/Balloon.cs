@@ -234,17 +234,22 @@ namespace Gu.Wpf.Geometry
             internal static Point Find(Line line, double angle, Rect rectangle, CornerRadius cornerRadius)
             {
                 var rotated = line.RotateAroundStartPoint(angle);
-                var ip = rotated.ClosestIntersection(rectangle);
+                return FindForRotated(rotated, rectangle, cornerRadius);
+            }
+
+            private static Point FindForRotated(Line line, Rect rectangle, CornerRadius cornerRadius)
+            {
+                var ip = line.ClosestIntersection(rectangle);
                 if (ip == null)
                 {
-                    var radius = FindClosestCornerRadius(rotated, rectangle, cornerRadius);
-                    return FindTangentPoint(rotated, radius);
+                    var radius = FindClosestCornerRadius(line, rectangle, cornerRadius);
+                    return FindTangentPoint(line, radius);
                 }
 
                 if (IsOnCornerRadius(ip.Value, rectangle, cornerRadius))
                 {
-                    var radius = FindClosestCornerRadius(rotated, rectangle, cornerRadius);
-                    ip = radius.ClosestIntersection(rotated);
+                    var radius = FindClosestCornerRadius(line, rectangle, cornerRadius);
+                    ip = radius.ClosestIntersection(line);
                     if (ip != null)
                     {
                         return ip.Value;

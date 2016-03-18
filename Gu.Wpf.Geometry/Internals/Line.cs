@@ -195,6 +195,15 @@
             return null;
         }
 
+
+        internal Line PerpendicularLineTo(Point p)
+        {
+            var toPoint = this.StartPoint.VectorTo(p);
+            var dotProdcut = toPoint.DotProdcut(this.Direction);
+            var startPoint = this.StartPoint + dotProdcut*this.Direction;
+            return new Line(startPoint, p);
+        }
+
         internal bool TryFindIntersectionPoint(Line other, out Point intersectionPoint)
         {
             var ip = IntersectionPoint(this, other, true);

@@ -31,24 +31,20 @@
 
         internal Point? ClosestIntersection(Line line)
         {
-            var v = this.Center - line.StartPoint;
-            var projected = v.ProjectOn(line.Direction);
-            var pp = line.StartPoint + projected;
-            var pv = pp - this.Center;
-            var pl = pv.Length;
+            var perp = line.PerpendicularLineTo(this.Center);
+            var pl = perp.Length;
+            if (pl < 1E-3)
+            {
+                return this.Center - this.Radius * line.Direction;
+            }
+
             if (pl > this.Radius)
             {
                 return null;
             }
-            if (pl < 1E-3)
-            {
-                return this.Center + this.Radius*line.Direction.Negated();
-            }
 
-            var tl = Math.Sqrt(this.Radius * this.Radius - pl * pl);
-            var tv = tl * pv.Rotate(90).Normalized();
-
-            return this.Center + (pv + tv);
+            var tangentLength = Math.Sqrt(this.Radius * this.Radius - pl * pl);
+            return perp.StartPoint - tangentLength * line.Direction;
         }
     }
 }
