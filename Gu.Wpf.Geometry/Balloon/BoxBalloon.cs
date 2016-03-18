@@ -9,7 +9,7 @@ namespace Gu.Wpf.Geometry
     {
         protected override void UpdateConnectorOffset()
         {
-            if (this.PlacementTarget != null)
+            if (this.PlacementTarget != null && this.RenderSize.Width > 0)
             {
                 if (this.IsVisible && this.PlacementTarget.IsVisible)
                 {
@@ -27,7 +27,7 @@ namespace Gu.Wpf.Geometry
                     var ip = new Line(mp, tp).ClosestIntersection(rect);
                     if (ip == null)
                     {
-                        throw new InvalidOperationException("bug in the library");
+                        throw new InvalidOperationException("Did not find an intersection, bug in the library");
                     }
 
                     var v = tp - ip.Value;
@@ -206,6 +206,7 @@ namespace Gu.Wpf.Geometry
                 Circle corner;
                 var toMid = line.PerpendicularLineTo(rectangle.MidPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
+
                 //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");
                 if (toMid.Value.Direction.Axis() != null)
                 {
@@ -215,16 +216,16 @@ namespace Gu.Wpf.Geometry
                 switch (toMid.Value.Direction.Quadrant())
                 {
                     case Quadrant.TopLeft:
-                        corner = CreateTopLeft(rectangle.TopLeft, cornerRadius.TopLeft);
-                        break;
-                    case Quadrant.TopRight:
                         corner = CreateTopRight(rectangle.TopRight, cornerRadius.TopRight);
                         break;
+                    case Quadrant.TopRight:
+                        corner = CreateTopLeft(rectangle.TopLeft, cornerRadius.TopLeft);
+                        break;
                     case Quadrant.BottomRight:
-                        corner = CreateBottomRight(rectangle.BottomRight, cornerRadius.BottomRight);
+                        corner = CreateBottomLeft(rectangle.BottomLeft, cornerRadius.BottomLeft);
                         break;
                     case Quadrant.BottomLeft:
-                        corner = CreateBottomLeft(rectangle.BottomLeft, cornerRadius.BottomLeft);
+                        corner = CreateBottomRight(rectangle.BottomRight, cornerRadius.BottomRight);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -239,8 +240,8 @@ namespace Gu.Wpf.Geometry
                 var toCenterDirection = line.StartPoint.VectorTo(corner.Center)
                                             .Normalized();
                 var perpDirection = line.Direction.AngleTo(toCenterDirection) > 0
-                                        ? toCenterDirection.Rotate(90)
-                                        : toCenterDirection.Rotate(-90);
+                                        ? toCenterDirection.Rotate(-90)
+                                        : toCenterDirection.Rotate(90);
                 var perpOffset = corner.Radius * perpDirection;
                 var tangentPoint = corner.Center + perpOffset;
                 return tangentPoint;
