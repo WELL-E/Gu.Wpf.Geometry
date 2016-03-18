@@ -167,7 +167,7 @@ namespace Gu.Wpf.Geometry
             var sp = ip.Value + this.ConnectorOffset;
             line = new Line(sp, mp + length * direction.Negated());
             var p1 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
-            var p2 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
+            var p2 = ConnectorPoint.Find(line, -this.ConnectorAngle / 2, rectangle, cr);
 
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
@@ -179,6 +179,29 @@ namespace Gu.Wpf.Geometry
 
             geometry.Freeze();
             return geometry;
+        }
+
+        protected virtual CornerRadius AdjustedCornerRadius()
+        {
+            var cr = this.CornerRadius.InflateBy(-this.StrokeThickness / 2)
+                                 .WithMin(0);
+            var left = cr.TopLeft + cr.BottomLeft;
+            var right = cr.TopRight + cr.BottomRight;
+            var top = cr.TopLeft + cr.TopRight;
+            var bottom = cr.BottomLeft + cr.BottomRight;
+            if (left < this.ActualHeight &&
+                right < this.ActualHeight &&
+                top < this.ActualWidth &&
+                bottom < this.ActualWidth)
+            {
+                return cr;
+            }
+
+            var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
+                                  Math.Min(this.ActualHeight / left, this.ActualHeight / right));
+            return cr.ScaleBy(factor)
+                     .InflateBy(-this.StrokeThickness/2)
+                     .WithMin(0);
         }
 
         protected virtual Geometry CreateGeometry(Geometry boxGeometry, Geometry connectorGeometry)
@@ -206,55 +229,56 @@ namespace Gu.Wpf.Geometry
             }
         }
 
-        private CornerRadius AdjustedCornerRadius()
-        {
-            var cr = this.CornerRadius.InflateBy(-this.StrokeThickness / 2)
-                                 .WithMin(0);
-            var left = cr.TopLeft + cr.BottomLeft;
-            var right = cr.TopRight + cr.BottomRight;
-            var top = cr.TopLeft + cr.TopRight;
-            var bottom = cr.BottomLeft + cr.BottomRight;
-            if (left < this.ActualHeight &&
-                right < this.ActualHeight &&
-                top < this.ActualWidth &&
-                bottom < this.ActualWidth)
-            {
-                return cr;
-            }
-
-            var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
-                                  Math.Min(this.ActualHeight / left, this.ActualHeight / right));
-            return cr.ScaleBy(factor).InflateBy(-this.StrokeThickness / 2).WithMin(0);
-        }
-
         private static class ConnectorPoint
         {
             internal static Point Find(Line line, double angle, Rect rectangle, CornerRadius cornerRadius)
             {
                 var rotated = line.RotateAroundStartPoint(angle);
                 var ip = rotated.ClosestIntersection(rectangle);
-                var radius = ClosestRadius(rotated, rectangle, cornerRadius);
-
                 if (ip == null)
                 {
+                    var radius = FindClosestCornerRadius(rotated, rectangle, cornerRadius);
                     return FindTangentPoint(rotated, radius);
                 }
 
-                var toCenter = line.StartPoint.VectorTo(radius.Center);
-                var toTangent = line.StartPoint.VectorToTangent(radius, angle > 0 ? Sign.Positive : Sign.Negative);
-                var threshold = Math.Abs(toCenter.AngleTo(toTangent));
-                if (Math.Abs(angle) >= threshold)
+                if (IsOnCornerRadius(ip.Value, rectangle, cornerRadius))
                 {
-                    return ip.Value;
+                    var radius = FindClosestCornerRadius(rotated, rectangle, cornerRadius);
+                    ip = radius.ClosestIntersection(rotated);
+                    if (ip != null)
+                    {
+                        return ip.Value;
+                    }
+
+                    throw new InvalidOperationException("Could not find intersection with radius");
                 }
 
-                ip = radius.ClosestIntersection(rotated);
-                if (ip != null)
+                return ip.Value;
+            }
+
+            private static bool IsOnCornerRadius(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius)
+            {
+                if (intersectionPoint.DistanceTo(rectangle.TopLeft) < cornerRadius.TopLeft)
                 {
-                    return ip.Value;
+                    return true;
                 }
 
-                throw new InvalidOperationException("Could not find intersection with radius");
+                if (intersectionPoint.DistanceTo(rectangle.TopRight) < cornerRadius.TopRight)
+                {
+                    return true;
+                }
+
+                if (intersectionPoint.DistanceTo(rectangle.BottomRight) < cornerRadius.BottomRight)
+                {
+                    return true;
+                }
+
+                if (intersectionPoint.DistanceTo(rectangle.BottomLeft) < cornerRadius.BottomLeft)
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             private static Point FindTangentPoint(Line line, Circle radius)
@@ -277,7 +301,7 @@ namespace Gu.Wpf.Geometry
                 }
             }
 
-            private static Circle ClosestRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
+            private static Circle FindClosestCornerRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
             {
                 if (line.Direction.X > 0 && line.Direction.Y > 0)
                 {
