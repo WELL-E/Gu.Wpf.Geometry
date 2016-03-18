@@ -1,8 +1,10 @@
 ﻿namespace Gu.Wpf.Geometry
 {
     using System;
+    using System.Diagnostics;
     using System.Windows;
 
+    [DebuggerDisplay("{Center.ToString()}, Radius: {Radius}")]
     internal struct Circle
     {
         internal readonly Point Center;

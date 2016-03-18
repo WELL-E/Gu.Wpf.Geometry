@@ -31,6 +31,15 @@
             return other - self;
         }
 
+        internal static Vector VectorToTangent(this Point self, Circle circle, Sign rotationDirection)
+        {
+            var toCenter = self.VectorTo(circle.Center);
+            var angle = rotationDirection == Sign.Positive ? 90:-90;
+            var perp = circle.Radius*toCenter.Rotate(angle).Normalized();
+            var toTangent = self.VectorTo(circle.Center + perp);
+            return toTangent;
+        }
+
         internal static Point Closest(this Point self, Point first, Point other)
         {
             return self.DistanceTo(first) < self.DistanceTo(other) ? first : other;

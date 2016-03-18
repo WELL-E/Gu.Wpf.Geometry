@@ -231,34 +231,34 @@ namespace Gu.Wpf.Geometry
         {
             internal static Point Find(Line line, double angle, Rect rectangle, CornerRadius cornerRadius)
             {
-                var l = line.RotateAroundStartPoint(angle);
-                var ip = l.ClosestIntersection(rectangle);
+                var rotated = line.RotateAroundStartPoint(angle);
+                var ip = rotated.ClosestIntersection(rectangle);
+                var radius = ClosestRadius(rotated, rectangle, cornerRadius);
+
                 if (ip == null)
                 {
-                    return FindTangentPoint(line, rectangle, cornerRadius);
+                    return FindTangentPoint(rotated, radius);
                 }
 
-                var radius = ClosestRadius(line, rectangle, cornerRadius);
                 var toCenter = line.StartPoint.VectorTo(radius.Center);
-                var perp = radius.Radius * toCenter.Rotate(90).Normalized();
-                var toTangent = line.StartPoint.VectorTo(radius.Center + perp);
-                var treshold = Math.Abs(toCenter.AngleTo(toTangent));
-                if (Math.Abs(angle) >= treshold)
+                var toTangent = line.StartPoint.VectorToTangent(radius, angle > 0 ? Sign.Positive : Sign.Negative);
+                var threshold = Math.Abs(toCenter.AngleTo(toTangent));
+                if (Math.Abs(angle) >= threshold)
                 {
                     return ip.Value;
                 }
 
-                ip = radius.ClosestIntersection(l);
-                if (ip == null)
+                ip = radius.ClosestIntersection(rotated);
+                if (ip != null)
                 {
-                    throw new InvalidOperationException("Could not find intersection with radius");
+                    return ip.Value;
                 }
-                return ip.Value;
+
+                throw new InvalidOperationException("Could not find intersection with radius");
             }
 
-            private static Point FindTangentPoint(Line line, Rect rectangle, CornerRadius cornerRadius)
+            private static Point FindTangentPoint(Line line, Circle radius)
             {
-                var radius = ClosestRadius(line, rectangle, cornerRadius);
                 var toCenter = line.StartPoint.VectorTo(radius.Center);
                 if (radius.Radius == 0)
                 {
@@ -279,22 +279,22 @@ namespace Gu.Wpf.Geometry
 
             private static Circle ClosestRadius(Line line, Rect rectangle, CornerRadius cornerRadius)
             {
-                if (line.Direction.X > 0 && line.Direction.Y < 0)
+                if (line.Direction.X > 0 && line.Direction.Y > 0)
                 {
                     var r = cornerRadius.TopLeft;
                     return new Circle(rectangle.TopLeft.WithOffset(r, r), r);
                 }
-                if (line.Direction.X < 0 && line.Direction.Y < 0)
+                if (line.Direction.X < 0 && line.Direction.Y > 0)
                 {
                     var r = cornerRadius.TopRight;
                     return new Circle(rectangle.TopRight.WithOffset(-r, r), r);
                 }
-                if (line.Direction.X < 0 && line.Direction.Y > 0)
+                if (line.Direction.X < 0 && line.Direction.Y < 0)
                 {
                     var r = cornerRadius.BottomRight;
                     return new Circle(rectangle.BottomRight.WithOffset(-r, -r), r);
                 }
-                if (line.Direction.X > 0 && line.Direction.Y > 0)
+                if (line.Direction.X > 0 && line.Direction.Y < 0)
                 {
                     var r = cornerRadius.BottomLeft;
                     return new Circle(rectangle.BottomLeft.WithOffset(r, -r), r);

@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Windows;
 
-    [DebuggerDisplay("StartPoint: {StartPoint.ToString()} EndPoint: {EndPoint.ToString()}")]
+    [DebuggerDisplay("{StartPoint.ToString()} -> {EndPoint.ToString()}")]
     internal struct Line
     {
         public readonly Point StartPoint;
