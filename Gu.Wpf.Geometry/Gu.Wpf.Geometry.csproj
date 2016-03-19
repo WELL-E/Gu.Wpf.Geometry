@@ -43,7 +43,7 @@
     <Compile Include="Balloon\Balloon.cs" />
     <Compile Include="Balloon\EllipseBalloon.cs" />
     <Compile Include="Balloon\PlacementOptionsExtension.cs" />
-    <Compile Include="Internals\Class1.cs" />
+    <Compile Include="Internals\BindingHelper.cs" />
     <Compile Include="Internals\Constants.cs" />
     <Compile Include="GradientPath\GradientMode.cs" />
     <Compile Include="GradientPath\GradientPath+FigureGeometry.cs" />

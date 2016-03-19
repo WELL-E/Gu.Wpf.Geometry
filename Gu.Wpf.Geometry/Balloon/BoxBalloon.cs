@@ -7,40 +7,93 @@ namespace Gu.Wpf.Geometry
 
     public class BoxBalloon : BalloonBase
     {
-        protected override Geometry CreateBoxGeometry(Size renderSize)
+        private static readonly DependencyProperty RectProperty = DependencyProperty.Register(
+            "Rect",
+            typeof(Rect),
+            typeof(BoxBalloon),
+            new PropertyMetadata(Rect.Empty));
+
+        private static readonly DependencyProperty RadiusXProperty = DependencyProperty.Register(
+            "RadiusX",
+            typeof(double),
+            typeof(BoxBalloon),
+            new PropertyMetadata(default(double)));
+
+        private static readonly DependencyProperty RadiusYProperty = DependencyProperty.Register(
+            "RadiusY",
+            typeof(double),
+            typeof(BoxBalloon),
+            new PropertyMetadata(default(double)));
+
+        protected override Geometry GetOrCreateBoxGeometry(Size renderSize)
         {
             var width = renderSize.Width - this.StrokeThickness;
             var height = renderSize.Height - this.StrokeThickness;
-            var geometry = new StreamGeometry();
-            using (var context = geometry.Open())
+            if (width <= 0 || height <= 0)
             {
-                var cr = this.AdjustedCornerRadius();
-                var p = cr.TopLeft > 0
-                    ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
-                    : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
-                context.BeginFigure(p, true, true);
-                p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
-
-                p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
-
-                p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
-
-                p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
-                context.LineTo(p, true, true);
-                context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
+                return Geometry.Empty;
             }
 
-            geometry.Freeze();
-            return geometry;
+            if (this.CornerRadius.IsAllEqual())
+            {
+                var oldRect = (Rect)this.GetValue(RectProperty);
+                this.SetValue(RectProperty, new Rect(new Point(0, 0), new Point(width, height)));
+
+                // using TopLeft here as we have already checked that they are equal
+                var r = this.CornerRadius.TopLeft;
+                this.SetValue(RadiusXProperty, r);
+                this.SetValue(RadiusYProperty, r);
+                if (oldRect.IsEmpty)
+                {
+                    var rectangleGeometry = new RectangleGeometry();
+                    rectangleGeometry.Bind(RectangleGeometry.RectProperty)
+                                     .OneWayTo(this, RectProperty);
+                    rectangleGeometry.Bind(RectangleGeometry.RadiusXProperty)
+                                     .OneWayTo(this, RadiusXProperty);
+                    rectangleGeometry.Bind(RectangleGeometry.RadiusYProperty)
+                                     .OneWayTo(this, RadiusYProperty);
+                    return rectangleGeometry;
+                }
+                else
+                {
+                    return this.BoxGeometry;
+                }
+            }
+            else
+            {
+                this.SetValue(RectProperty, Rect.Empty);
+
+                var geometry = new StreamGeometry();
+                using (var context = geometry.Open())
+                {
+                    var cr = this.AdjustedCornerRadius();
+                    var p = cr.TopLeft > 0
+                        ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
+                        : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
+                    context.BeginFigure(p, true, true);
+                    p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
+
+                    p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
+
+                    p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
+
+                    p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
+                    context.LineTo(p, true, true);
+                    context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
+                }
+
+                geometry.Freeze();
+                return geometry;
+            }
         }
 
-        protected override Geometry CreateConnectorGeometry(Size renderSize)
+        protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
         {
             if (this.ConnectorOffset == default(Vector) || renderSize.IsEmpty)
             {

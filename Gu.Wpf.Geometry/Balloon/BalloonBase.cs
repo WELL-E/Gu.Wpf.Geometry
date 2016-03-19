@@ -3,6 +3,7 @@ namespace Gu.Wpf.Geometry
     using System;
     using System.Diagnostics;
     using System.Windows;
+    using System.Windows.Data;
     using System.Windows.Media;
     using System.Windows.Shapes;
 
@@ -67,7 +68,6 @@ namespace Gu.Wpf.Geometry
 
         private readonly PenCache penCache = new PenCache();
         private Geometry balloonGeometry;
-        private Geometry boxGeometry;
 
         static BalloonBase()
         {
@@ -104,9 +104,11 @@ namespace Gu.Wpf.Geometry
             set { this.SetValue(PlacementOptionsProperty, value); }
         }
 
-        protected override Geometry DefiningGeometry => this.boxGeometry ?? Geometry.Empty;
+        protected override Geometry DefiningGeometry => this.BoxGeometry ?? Geometry.Empty;
 
         protected Geometry ConnectorGeometry { get; private set; }
+
+        protected Geometry BoxGeometry { get; private set; }
 
         protected override Size MeasureOverride(Size constraint)
         {
@@ -135,20 +137,48 @@ namespace Gu.Wpf.Geometry
         {
             if (this.RenderSize == Size.Empty)
             {
-                this.boxGeometry = Geometry.Empty;
+                if (this.BoxGeometry != null)
+                {
+                    BindingOperations.ClearAllBindings(this.BoxGeometry);
+                }
+
+                this.BoxGeometry = Geometry.Empty;
+                if (this.ConnectorGeometry != null)
+                {
+                    BindingOperations.ClearAllBindings(this.ConnectorGeometry);
+                }
+
                 this.ConnectorGeometry = Geometry.Empty;
                 this.balloonGeometry = Geometry.Empty;
                 return;
             }
 
-            this.boxGeometry = this.CreateBoxGeometry(this.RenderSize);
-            this.ConnectorGeometry = this.CreateConnectorGeometry(this.RenderSize);
-            this.balloonGeometry = this.CreateGeometry(this.boxGeometry, this.ConnectorGeometry);
+            var boxGeometry = this.GetOrCreateBoxGeometry(this.RenderSize);
+            var connectorGeometry = this.GetOrCreateConnectorGeometry(this.RenderSize);
+            if (ReferenceEquals(boxGeometry, this.BoxGeometry) && 
+                ReferenceEquals(connectorGeometry, this.ConnectorGeometry))
+            {
+                return;
+            }
+
+            if (this.BoxGeometry != null && !ReferenceEquals(boxGeometry, this.BoxGeometry))
+            {
+                BindingOperations.ClearAllBindings(this.BoxGeometry);
+            }
+
+            this.BoxGeometry = boxGeometry;
+            if (this.ConnectorGeometry != null && !ReferenceEquals(connectorGeometry, this.ConnectorGeometry))
+            {
+                BindingOperations.ClearAllBindings(this.ConnectorGeometry);
+            }
+
+            this.ConnectorGeometry = connectorGeometry;
+            this.balloonGeometry = this.CreateGeometry(this.BoxGeometry, this.ConnectorGeometry);
         }
 
-        protected abstract Geometry CreateBoxGeometry(Size renderSize);
+        protected abstract Geometry GetOrCreateBoxGeometry(Size renderSize);
 
-        protected abstract Geometry CreateConnectorGeometry(Size renderSize);
+        protected abstract Geometry GetOrCreateConnectorGeometry(Size renderSize);
 
         protected virtual Geometry CreateGeometry(Geometry box, Geometry connector)
         {
