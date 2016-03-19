@@ -9,15 +9,6 @@ namespace Gu.Wpf.Geometry
 
     public abstract class BalloonBase : Shape
     {
-        public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
-            "CornerRadius",
-            typeof(CornerRadius),
-            typeof(BalloonBase),
-            new FrameworkPropertyMetadata(
-                default(CornerRadius),
-                FrameworkPropertyMetadataOptions.AffectsRender,
-                OnCornerRadiusChanged));
-
         public static readonly DependencyProperty ConnectorOffsetProperty = DependencyProperty.Register(
             "ConnectorOffset",
             typeof(Vector),
@@ -72,12 +63,6 @@ namespace Gu.Wpf.Geometry
         static BalloonBase()
         {
             StretchProperty.OverrideMetadata(typeof(BalloonBase), new FrameworkPropertyMetadata(Stretch.Fill));
-        }
-
-        public CornerRadius CornerRadius
-        {
-            get { return (CornerRadius)this.GetValue(CornerRadiusProperty); }
-            set { this.SetValue(CornerRadiusProperty, value); }
         }
 
         public Vector ConnectorOffset
@@ -230,15 +215,6 @@ namespace Gu.Wpf.Geometry
         protected virtual void OnLayoutUpdated(object _, EventArgs __)
         {
             this.UpdateConnectorOffset();
-        }
-
-        private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var balloon = (BalloonBase)d;
-            if (balloon.IsInitialized)
-            {
-                balloon.UpdateCachedGeometries();
-            }
         }
 
         private static void OnConnectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
