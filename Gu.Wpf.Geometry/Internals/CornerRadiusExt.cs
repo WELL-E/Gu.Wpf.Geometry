@@ -40,6 +40,14 @@
                    cornerRadius.BottomLeft <= 0;
         }
 
+        internal static bool IsAnyZero(this CornerRadius cornerRadius)
+        {
+            return cornerRadius.TopLeft <= 0 ||
+                   cornerRadius.TopRight <= 0 ||
+                   cornerRadius.BottomRight <= 0 ||
+                   cornerRadius.BottomLeft <= 0;
+        }
+
         internal static bool IsAllEqual(this CornerRadius cornerRadius)
         {
             // ReSharper disable CompareOfFloatsByEqualityOperator

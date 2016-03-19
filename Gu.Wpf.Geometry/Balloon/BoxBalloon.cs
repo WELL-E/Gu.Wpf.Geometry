@@ -9,8 +9,8 @@ namespace Gu.Wpf.Geometry
     {
         public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
             "CornerRadius",
-            typeof (CornerRadius),
-            typeof (BoxBalloon),
+            typeof(CornerRadius),
+            typeof(BoxBalloon),
             new FrameworkPropertyMetadata(
                 default(CornerRadius),
                 FrameworkPropertyMetadataOptions.AffectsRender,
@@ -55,34 +55,36 @@ namespace Gu.Wpf.Geometry
                     .OneWayTo(this, CornerRadiusProperty, CornerRadiusTopLeftConverter.Default);
                 return rectangleGeometry;
             }
-
-            var geometry = new StreamGeometry();
-            using (var context = geometry.Open())
+            else
             {
-                var cr = this.AdjustedCornerRadius();
-                var p = cr.TopLeft > 0
-                    ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
-                    : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
-                context.BeginFigure(p, true, true);
-                p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
+                var geometry = new StreamGeometry();
+                using (var context = geometry.Open())
+                {
+                    var cr = this.AdjustedCornerRadius();
+                    var p = cr.TopLeft > 0
+                        ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
+                        : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
+                    context.BeginFigure(p, true, true);
+                    p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
 
-                p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
+                    p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
 
-                p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
-                context.LineTo(p, true, true);
-                p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
+                    p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
+                    context.LineTo(p, true, true);
+                    p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
 
-                p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
-                context.LineTo(p, true, true);
-                context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
+                    p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
+                    context.LineTo(p, true, true);
+                    context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
+                }
+
+                geometry.Freeze();
+                return geometry;
             }
-
-            geometry.Freeze();
-            return geometry;
         }
 
         protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
@@ -122,26 +124,17 @@ namespace Gu.Wpf.Geometry
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             this.SetValue(ConnectorPoint1Property, p1);
             this.SetValue(ConnectorPoint2Property, p2);
-            if (this.ConnectorGeometry == null || this.ConnectorGeometry.IsEmpty())
+            if (this.ConnectorGeometry != null && !this.ConnectorGeometry.IsEmpty())
             {
-                var figure = new PathFigure { IsClosed = true };
-                figure.Bind(PathFigure.StartPointProperty)
-                      .OneWayTo(this, ConnectorPoint1Property);
-                var s1 = new LineSegment { IsStroked = true };
-                s1.Bind(LineSegment.PointProperty)
-                  .OneWayTo(this, ConnectorVertexPointProperty);
-
-                var s2 = new LineSegment { IsStroked = true };
-                s2.Bind(LineSegment.PointProperty)
-                  .OneWayTo(this, ConnectorPoint2Property);
-                figure.Segments.Add(s1);
-                figure.Segments.Add(s2);
-                var geometry = new PathGeometry();
-                geometry.Figures.Add(figure);
-                return geometry;
+                return this.ConnectorGeometry;
             }
 
-            return this.ConnectorGeometry;
+            var figure = this.CreatePathFigureStartingAt(ConnectorPoint1Property);
+            figure.Segments.Add(this.CreateLineSegmentTo(ConnectorVertexPointProperty));
+            figure.Segments.Add(this.CreateLineSegmentTo(ConnectorPoint2Property));
+            var geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+            return geometry;
         }
 
         protected virtual CornerRadius AdjustedCornerRadius()
@@ -165,6 +158,22 @@ namespace Gu.Wpf.Geometry
             return cr.ScaleBy(factor)
                      .InflateBy(-this.StrokeThickness / 2)
                      .WithMin(0);
+        }
+
+        private PathFigure CreatePathFigureStartingAt(DependencyProperty property)
+        {
+            var figure = new PathFigure { IsClosed = true };
+            figure.Bind(PathFigure.StartPointProperty)
+                .OneWayTo(this, property);
+            return figure;
+        }
+
+        private LineSegment CreateLineSegmentTo(DependencyProperty property)
+        {
+            var lineSegment = new LineSegment { IsStroked = true };
+            lineSegment.Bind(LineSegment.PointProperty)
+                .OneWayTo(this, property);
+            return lineSegment;
         }
 
         private static class ConnectorPoint
