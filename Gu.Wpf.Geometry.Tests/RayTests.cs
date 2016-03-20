@@ -127,10 +127,9 @@
             {
                 var direction = xv.Rotate(i);
                 var pointOnRect = new Ray(rect.CenterPoint(), direction).FirstIntersectionWith(rect).Value;
-                var lower = i%89 > 0
-                                ? i%89
-                                : i%89 - 89;
-                for (var j = lower; j < 178 + lower; j++)
+                var lower = i%90 - 89;
+                var upper = 178 + lower;
+                for (var j = lower; j < upper; j++)
                 {
                     var rayDirection = direction.Rotate(j);
                     var ray = new Ray(pointOnRect + rayDirection, rayDirection.Negated());
