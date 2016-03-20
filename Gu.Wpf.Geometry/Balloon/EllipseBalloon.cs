@@ -53,7 +53,10 @@ namespace Gu.Wpf.Geometry
                 return Geometry.Empty;
             }
 
-            var direction = this.ConnectorOffset.Normalized();
+            var direction = this.ConnectorOffset;
+            var tp = ellipse.PointOnCircumference(direction);
+            var vertexPoint = tp + this.ConnectorOffset;
+            this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             return Geometry.Empty;
             //var p = ellipse.Point
             //var length = 2 * Math.Max(ellipse.RadiusX, ellipse.RadiusX);

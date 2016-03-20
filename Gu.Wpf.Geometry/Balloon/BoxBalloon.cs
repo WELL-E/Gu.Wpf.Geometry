@@ -100,22 +100,21 @@ namespace Gu.Wpf.Geometry
             var height = renderSize.Height - this.StrokeThickness;
             var mp = new Point(width / 2, height / 2);
             var direction = this.ConnectorOffset.Normalized();
-            var length = width * width + height * height;
-            var line = new Line(mp, mp + length * direction);
+            var fromCenter = new Ray(mp, this.ConnectorOffset);
 
-            var ip = line.ClosestIntersection(rectangle);
+            var ip = fromCenter.FirstIntersectionWith(rectangle);
             if (ip == null)
             {
-                Debug.Assert(false, $"Line {line} does not intersect rectangle {rectangle}");
+                Debug.Assert(false, $"Line {fromCenter} does not intersect rectangle {rectangle}");
                 // ReSharper disable once HeuristicUnreachableCode
                 return Geometry.Empty;
             }
 
             var cr = this.AdjustedCornerRadius();
             var vertexPoint = ip.Value + this.ConnectorOffset;
-            line = new Line(vertexPoint, mp + length * direction.Negated());
-            var p1 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
-            var p2 = ConnectorPoint.Find(line, -this.ConnectorAngle / 2, rectangle, cr);
+            var toCenter = fromCenter.Flip();
+            var p1 = ConnectorPoint.Find(toCenter, this.ConnectorAngle / 2, rectangle, cr);
+            var p2 = ConnectorPoint.Find(toCenter, -this.ConnectorAngle / 2, rectangle, cr);
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             this.SetValue(ConnectorPoint1Property, p1);
             this.SetValue(ConnectorPoint2Property, p2);
@@ -155,6 +154,15 @@ namespace Gu.Wpf.Geometry
                      .WithMin(0);
         }
 
+        private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var balloon = (BoxBalloon)d;
+            if (balloon.IsInitialized)
+            {
+                balloon.UpdateCachedGeometries();
+            }
+        }
+
         private PathFigure CreatePathFigureStartingAt(DependencyProperty property)
         {
             var figure = new PathFigure { IsClosed = true };
@@ -173,27 +181,27 @@ namespace Gu.Wpf.Geometry
 
         private static class ConnectorPoint
         {
-            internal static Point Find(Line line, double angle, Rect rectangle, CornerRadius cornerRadius)
+            internal static Point Find(Ray toCenter, double angle, Rect rectangle, CornerRadius cornerRadius)
             {
-                var rotated = line.RotateAroundStartPoint(angle);
+                var rotated = toCenter.Rotate(angle);
                 return FindForRotated(rotated, rectangle, cornerRadius);
             }
 
-            private static Point FindForRotated(Line line, Rect rectangle, CornerRadius cornerRadius)
+            private static Point FindForRotated(Ray ray, Rect rectangle, CornerRadius cornerRadius)
             {
-                var ip = line.ClosestIntersection(rectangle);
+                var ip = ray.FirstIntersectionWith(rectangle);
                 if (ip == null)
                 {
-                    return FindTangentPoint(line, rectangle, cornerRadius);
+                    return FindTangentPoint(ray, rectangle, cornerRadius);
                 }
 
                 Circle corner;
                 if (TryGetCorner(ip.Value, rectangle, cornerRadius, out corner))
                 {
-                    ip = corner.ClosestIntersection(line);
+                    ip = ray.FirstIntersectionWith(corner);
                     if (ip == null)
                     {
-                        return FindTangentPoint(line, rectangle, cornerRadius);
+                        return FindTangentPoint(ray, rectangle, cornerRadius);
                     }
 
                     return ip.Value;
@@ -222,10 +230,10 @@ namespace Gu.Wpf.Geometry
                 return false;
             }
 
-            private static Point FindTangentPoint(Line line, Rect rectangle, CornerRadius cornerRadius)
+            private static Point FindTangentPoint(Ray ray, Rect rectangle, CornerRadius cornerRadius)
             {
                 Circle corner;
-                var toMid = line.PerpendicularLineTo(rectangle.CenterPoint());
+                var toMid = ray.PerpendicularLineTo(rectangle.CenterPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
                 if (toMid == null)
                 {
@@ -236,7 +244,7 @@ namespace Gu.Wpf.Geometry
                 //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");
                 if (toMid.Value.Direction.Axis() != null)
                 {
-                    return line.StartPoint.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
+                    return ray.Point.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
                 }
 
                 switch (toMid.Value.Direction.Quadrant())
@@ -263,9 +271,9 @@ namespace Gu.Wpf.Geometry
                     return corner.Center;
                 }
 
-                var toCenterDirection = line.StartPoint.VectorTo(corner.Center)
+                var toCenterDirection = ray.Point.VectorTo(corner.Center)
                                             .Normalized();
-                var perpDirection = line.Direction.AngleTo(toCenterDirection) > 0
+                var perpDirection = ray.Direction.AngleTo(toCenterDirection) > 0
                                         ? toCenterDirection.Rotate(-90)
                                         : toCenterDirection.Rotate(90);
                 var perpOffset = corner.Radius * perpDirection;
@@ -280,15 +288,6 @@ namespace Gu.Wpf.Geometry
             private static Circle CreateBottomRight(Point p, double r) => new Circle(p.WithOffset(-r, -r), r);
 
             private static Circle CreateBottomLeft(Point p, double r) => new Circle(p.WithOffset(r, -r), r);
-        }
-
-        private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var balloon = (BoxBalloon)d;
-            if (balloon.IsInitialized)
-            {
-                balloon.UpdateCachedGeometries();
-            }
         }
     }
 }

@@ -70,6 +70,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CircleTests.cs" />
+    <Compile Include="EllipseTests.cs" />
     <Compile Include="FigureGeometryTests.cs" />
     <Compile Include="GradientPathTests.cs" />
     <Compile Include="Helpers\LineComparer.cs" />

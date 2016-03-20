@@ -175,41 +175,24 @@
 
         internal Point? ClosestIntersection(Rect rectangle)
         {
-            if (rectangle.Contains(this.StartPoint))
-            {
-                switch (this.Direction.Quadrant())
-                {
-                    case Quadrant.NegativeXPositiveY:
-                        return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                               IntersectionPoint(rectangle.BottomLine(), this, true);
-                    case Quadrant.PositiveXPositiveY:
-                        return IntersectionPoint(rectangle.RightLine(), this, true) ??
-                               IntersectionPoint(rectangle.BottomLine(), this, true);
-                    case Quadrant.PositiveXNegativeY:
-                        return IntersectionPoint(rectangle.RightLine(), this, true) ??
-                               IntersectionPoint(rectangle.TopLine(), this, true);
-                    case Quadrant.NegativeXNegativeY:
-                        return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                               IntersectionPoint(rectangle.TopLine(), this, true);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            var quadrant = rectangle.Contains(this.StartPoint)
+                ? this.Direction.Quadrant()
+                : this.Direction.Negated().Quadrant();
 
-            switch (this.Direction.Quadrant())
+            switch (quadrant)
             {
                 case Quadrant.NegativeXPositiveY:
-                    return IntersectionPoint(rectangle.RightLine(), this, true) ??
-                           IntersectionPoint(rectangle.TopLine(), this, true);
+                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                           IntersectionPoint(rectangle.BottomLine(), this, true);
                 case Quadrant.PositiveXPositiveY:
-                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                           IntersectionPoint(rectangle.TopLine(), this, true);
-                case Quadrant.PositiveXNegativeY:
-                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
-                           IntersectionPoint(rectangle.BottomLine(), this, true);
-                case Quadrant.NegativeXNegativeY:
                     return IntersectionPoint(rectangle.RightLine(), this, true) ??
                            IntersectionPoint(rectangle.BottomLine(), this, true);
+                case Quadrant.PositiveXNegativeY:
+                    return IntersectionPoint(rectangle.RightLine(), this, true) ??
+                           IntersectionPoint(rectangle.TopLine(), this, true);
+                case Quadrant.NegativeXNegativeY:
+                    return IntersectionPoint(rectangle.LeftLine(), this, true) ??
+                           IntersectionPoint(rectangle.TopLine(), this, true);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
