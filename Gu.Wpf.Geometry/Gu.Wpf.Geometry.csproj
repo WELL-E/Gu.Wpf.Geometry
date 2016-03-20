@@ -58,6 +58,7 @@
     <Compile Include="Internals\Axis.cs" />
     <Compile Include="Internals\Circle.cs" />
     <Compile Include="Internals\CornerRadiusExt.cs" />
+    <Compile Include="Internals\Ellipse.cs" />
     <Compile Include="Internals\GradientStopCollectionExt.cs" />
     <Compile Include="Internals\Line.cs" />
     <Compile Include="Internals\LineExt.cs" />

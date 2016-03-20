@@ -46,14 +46,14 @@ namespace Gu.Wpf.Geometry
                     return this.BoxGeometry;
                 }
 
-                var rectangleGeometry = new RectangleGeometry();
-                rectangleGeometry.Bind(RectangleGeometry.RectProperty)
+                var geometry = new RectangleGeometry();
+                geometry.Bind(RectangleGeometry.RectProperty)
                     .OneWayTo(this, RectProperty);
-                rectangleGeometry.Bind(RectangleGeometry.RadiusXProperty)
+                geometry.Bind(RectangleGeometry.RadiusXProperty)
                     .OneWayTo(this, CornerRadiusProperty, CornerRadiusTopLeftConverter.Default);
-                rectangleGeometry.Bind(RectangleGeometry.RadiusYProperty)
+                geometry.Bind(RectangleGeometry.RadiusYProperty)
                     .OneWayTo(this, CornerRadiusProperty, CornerRadiusTopLeftConverter.Default);
-                return rectangleGeometry;
+                return geometry;
             }
             else
             {
@@ -89,11 +89,6 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
         {
-            if (this.ConnectorOffset == default(Vector) || renderSize.IsEmpty)
-            {
-                return Geometry.Empty;
-            }
-
             var rectangle = new Rect(new Point(0, 0), renderSize);
             rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
             if (rectangle.IsEmpty)
@@ -230,12 +225,12 @@ namespace Gu.Wpf.Geometry
             private static Point FindTangentPoint(Line line, Rect rectangle, CornerRadius cornerRadius)
             {
                 Circle corner;
-                var toMid = line.PerpendicularLineTo(rectangle.MidPoint());
+                var toMid = line.PerpendicularLineTo(rectangle.CenterPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
                 if (toMid == null)
                 {
                     // failing silently in release
-                    return rectangle.MidPoint();
+                    return rectangle.CenterPoint();
                 }
 
                 //Debug.Assert(!rectangle.Contains(toMid.Value.StartPoint), "Cannot find tangent if line intersects rectangle");

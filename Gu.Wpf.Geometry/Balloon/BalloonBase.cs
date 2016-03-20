@@ -139,7 +139,9 @@ namespace Gu.Wpf.Geometry
             }
 
             var boxGeometry = this.GetOrCreateBoxGeometry(this.RenderSize);
-            var connectorGeometry = this.GetOrCreateConnectorGeometry(this.RenderSize);
+            var connectorGeometry = this.CanCreateConnectorGeometry() 
+                    ? this.GetOrCreateConnectorGeometry(this.RenderSize)
+                    : Geometry.Empty;
             if (ReferenceEquals(boxGeometry, this.BoxGeometry) && 
                 ReferenceEquals(connectorGeometry, this.ConnectorGeometry))
             {
@@ -159,6 +161,13 @@ namespace Gu.Wpf.Geometry
 
             this.ConnectorGeometry = connectorGeometry;
             this.balloonGeometry = this.CreateGeometry(this.BoxGeometry, this.ConnectorGeometry);
+        }
+
+        private bool CanCreateConnectorGeometry()
+        {
+            return this.ConnectorOffset != default(Vector) &&
+                   this.RenderSize.Width > 0 &&
+                   this.RenderSize.Height > 0;
         }
 
         protected abstract Geometry GetOrCreateBoxGeometry(Size renderSize);
@@ -187,7 +196,7 @@ namespace Gu.Wpf.Geometry
                         return;
                     }
 
-                    var mp = selfRect.MidPoint();
+                    var mp = selfRect.CenterPoint();
                     var ip = new Line(mp, tp.Value).ClosestIntersection(selfRect);
                     Debug.Assert(ip != null, "Did not find an intersection, bug in the library");
                     if (ip == null)

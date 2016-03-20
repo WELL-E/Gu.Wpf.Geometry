@@ -1,51 +1,63 @@
 namespace Gu.Wpf.Geometry
 {
+    using System;
+    using System.Globalization;
     using System.Windows;
+    using System.Windows.Data;
     using System.Windows.Media;
 
     public class EllipseBalloon : BalloonBase
     {
+        private static readonly DependencyProperty EllipseProperty = DependencyProperty.Register(
+            "Ellipse",
+            typeof(Ellipse),
+            typeof(EllipseBalloon),
+            new PropertyMetadata(default(Ellipse)));
+
         protected override Geometry GetOrCreateBoxGeometry(Size renderSize)
         {
             var width = renderSize.Width - this.StrokeThickness;
             var height = renderSize.Height - this.StrokeThickness;
+            var rx = width / 2;
+            var ry = height / 2;
+            this.SetValue(EllipseProperty, new Ellipse(new Point(rx, ry), rx, ry));
             if (width <= 0 || height <= 0)
             {
-                if (this.StrokeThickness <= 0)
-                {
-                    return Geometry.Empty;
-                }
-
-                return new EllipseGeometry(new Point(this.StrokeThickness / 2, this.StrokeThickness / 2), this.StrokeThickness, this.StrokeThickness);
+                return Geometry.Empty;
             }
 
-            var rect = new Rect(new Point(0, 0), new Size(width, height));
-            var geometry = new EllipseGeometry(rect);
-            geometry.Freeze();
+            if (this.BoxGeometry is EllipseGeometry)
+            {
+                return this.BoxGeometry;
+            }
+
+            var geometry = new EllipseGeometry();
+            geometry.Bind(EllipseGeometry.CenterProperty)
+                    .OneWayTo(this, EllipseProperty, EllipseCenterConverter.Default);
+            geometry.Bind(EllipseGeometry.RadiusXProperty)
+                    .OneWayTo(this, EllipseProperty, EllipseRadiusXConverter.Default);
+            geometry.Bind(EllipseGeometry.RadiusYProperty)
+                    .OneWayTo(this, EllipseProperty, EllipseRadiusYConverter.Default);
             return geometry;
         }
 
         protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
         {
-            if (this.ConnectorOffset == default(Vector) || renderSize.IsEmpty)
+            var width = renderSize.Width - this.StrokeThickness;
+            var height = renderSize.Height - this.StrokeThickness;
+            var rx = width / 2;
+            var ry = height / 2;
+            var ellipse = new Ellipse(new Point(rx, ry), rx, ry);
+            if (ellipse.IsZero)
             {
                 return Geometry.Empty;
             }
 
-            var rectangle = new Rect(new Point(0, 0), renderSize);
-            rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
-            if (rectangle.IsEmpty)
-            {
-                return Geometry.Empty;
-            }
-
+            var direction = this.ConnectorOffset.Normalized();
             return Geometry.Empty;
-            //var width = renderSize.Width - this.StrokeThickness;
-            //var height = renderSize.Height - this.StrokeThickness;
-            //var mp = new Point(width / 2, height / 2);
-            //var direction = this.ConnectorOffset.Normalized();
-            //var length = width * width + height * height;
-            //var line = new Line(mp, mp + length * direction);
+            //var p = ellipse.Point
+            //var length = 2 * Math.Max(ellipse.RadiusX, ellipse.RadiusX);
+            //var line = ellipse.Center.LineTo(ellipse.Center + length * direction);
 
             //var ip = line.ClosestIntersection(rectangle);
             //if (ip == null)
@@ -71,6 +83,63 @@ namespace Gu.Wpf.Geometry
 
             //geometry.Freeze();
             //return geometry;
+        }
+
+        private class EllipseCenterConverter : IValueConverter
+        {
+            internal static readonly EllipseCenterConverter Default = new EllipseCenterConverter();
+
+            private EllipseCenterConverter()
+            {
+            }
+
+            public object Convert(object value, Type _, object __, CultureInfo ___)
+            {
+                return ((Ellipse)value).Center;
+            }
+
+            public object ConvertBack(object _, Type __, object ___, CultureInfo ____)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private class EllipseRadiusXConverter : IValueConverter
+        {
+            internal static readonly EllipseRadiusXConverter Default = new EllipseRadiusXConverter();
+
+            private EllipseRadiusXConverter()
+            {
+            }
+
+            public object Convert(object value, Type _, object __, CultureInfo ___)
+            {
+                return ((Ellipse)value).RadiusX;
+            }
+
+            public object ConvertBack(object _, Type __, object ___, CultureInfo ____)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private class EllipseRadiusYConverter : IValueConverter
+        {
+            internal static readonly EllipseRadiusYConverter Default = new EllipseRadiusYConverter();
+
+            private EllipseRadiusYConverter()
+            {
+            }
+
+            public object Convert(object value, Type _, object __, CultureInfo ___)
+            {
+                return ((Ellipse)value).RadiusY;
+            }
+
+            public object ConvertBack(object _, Type __, object ___, CultureInfo ____)
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
