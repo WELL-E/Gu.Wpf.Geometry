@@ -28,7 +28,7 @@
         <TabItem Header="PlacementOptionsExtension">
             <local:PlacementOptionsExtensionView Margin="100" />
         </TabItem>
-        
+
         <TabItem Header="ballon popup">
             <local:BalloonPopupView />
         </TabItem>

@@ -14,6 +14,19 @@
             this.Direction = direction;
         }
 
+        internal static Ray Parse(string text)
+        {
+            var strings = text.Split(';');
+            if (strings.Length != 2)
+            {
+                throw new ArgumentException();
+            }
+
+            var p = Point.Parse(strings[0]);
+            var v = Vector.Parse(strings[1]).Normalized();
+            return new Ray(p, v);
+        }
+
         internal Ray Rotate(double angleInDegrees)
         {
             return new Ray(this.Point, this.Direction.Rotate(angleInDegrees));
@@ -94,12 +107,46 @@
             }
 
             var tangentLength = Math.Sqrt(circle.Radius * circle.Radius - pl * pl);
-            return perp.Value.StartPoint - tangentLength * this.Direction;
+            var result = perp.Value.StartPoint - tangentLength * this.Direction;
+            return this.IsPointOn(result)
+                       ? (Point?)result
+                       : null;
         }
 
-        internal Point? FirstIntersectionWith(Ellipse rectangle)
+        // http://www.mare.ee/indrek/misc/2d.pdf
+        internal Point? FirstIntersectionWith(Ellipse ellipse)
         {
-            throw new NotImplementedException();
+            var nx = this.Direction.X;
+            var nx2 = nx * nx;
+            var ny = this.Direction.Y;
+            var ny2 = ny * ny;
+            var x0 = ellipse.Center.X;
+            var x02 = x0 * x0;
+            var y0 = ellipse.Center.Y;
+            var y02 = y0 * y0;
+            var a = ellipse.RadiusX;
+            var a2 = a * a;
+            var b = ellipse.RadiusY;
+            var b2 = b * b;
+            var A = nx2 * b2 + ny2 * a2;
+            if (Math.Abs(A) < Constants.Tolerance)
+            {
+                return null;
+            }
+
+            var B = 2 * x0 * nx * b2 + 2 * y0 * ny * a2;
+            var C = x02 * b2 + y02 * a2 - a2 * b2;
+            var d = B * B - 4 * A * C;
+            if (d < 0)
+            {
+                return null;
+            }
+
+            var s = (-B - Math.Sqrt(d)) / 2 * A;
+            var result = ellipse.Center + s * this.Direction;
+            return this.IsPointOn(result)
+                       ? (Point?)result
+                       : null;
         }
 
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
