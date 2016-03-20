@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.Windows;
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal struct Ellipse
     {
         internal readonly Point Center;
@@ -26,6 +27,8 @@
         }
 
         internal bool IsZero => this.RadiusX <= 0 || this.RadiusY <= 0;
+
+        private string DebuggerDisplay => $"{this.Center.ToString("F1")} rx: {this.RadiusX.ToString("F1")} ry: {this.RadiusY.ToString("F1")}";
 
         internal static Ellipse Parse(string text)
         {

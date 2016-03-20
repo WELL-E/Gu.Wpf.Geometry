@@ -1,8 +1,10 @@
 ﻿namespace Gu.Wpf.Geometry
 {
     using System;
+    using System.Diagnostics;
     using System.Windows;
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal struct Ray
     {
         internal readonly Point Point;
@@ -11,8 +13,10 @@
         internal Ray(Point point, Vector direction)
         {
             this.Point = point;
-            this.Direction = direction;
+            this.Direction = direction.Normalized();
         }
+
+        private string DebuggerDisplay => $"{this.Point.ToString("F1")} -> {this.Direction.ToString("F1")}";
 
         internal static Ray Parse(string text)
         {
@@ -120,9 +124,9 @@
             var nx2 = nx * nx;
             var ny = this.Direction.Y;
             var ny2 = ny * ny;
-            var x0 = ellipse.Center.X;
+            var x0 = this.Point.X;
             var x02 = x0 * x0;
-            var y0 = ellipse.Center.Y;
+            var y0 = this.Point.Y;
             var y02 = y0 * y0;
             var a = ellipse.RadiusX;
             var a2 = a * a;
@@ -142,11 +146,17 @@
                 return null;
             }
 
-            var s = (-B - Math.Sqrt(d)) / 2 * A;
-            var result = ellipse.Center + s * this.Direction;
-            return this.IsPointOn(result)
-                       ? (Point?)result
-                       : null;
+            var sqrt = Math.Sqrt(d);
+            var s = (-B - sqrt) / 2 * A;
+            if (s < 0)
+            {
+                s = (-B + sqrt) / 2 * A;
+                return s > 0
+                           ? this.Point + s * this.Direction
+                           : (Point?)null;
+            }
+
+            return this.Point + s * this.Direction;
         }
 
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
