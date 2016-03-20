@@ -54,38 +54,65 @@ namespace Gu.Wpf.Geometry
             }
 
             var direction = this.ConnectorOffset;
-            var tp = ellipse.PointOnCircumference(direction);
-            var vertexPoint = tp + this.ConnectorOffset;
+            var ip = ellipse.PointOnCircumference(direction);
+            var vertexPoint = ip + this.ConnectorOffset;
+            var ray = new Ray(vertexPoint, this.ConnectorOffset.Negated());
+
+            var p1 = ConnectorPoint.Find(ray, this.ConnectorAngle / 2, ellipse);
+            var p2 = ConnectorPoint.Find(ray, -this.ConnectorAngle / 2, ellipse);
+
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
-            return Geometry.Empty;
-            //var p = ellipse.Point
-            //var length = 2 * Math.Max(ellipse.RadiusX, ellipse.RadiusX);
-            //var line = ellipse.Center.LineTo(ellipse.Center + length * direction);
+            this.SetValue(ConnectorPoint1Property, p1);
+            this.SetValue(ConnectorPoint2Property, p2);
+            if (this.ConnectorGeometry is PathGeometry)
+            {
+                return this.ConnectorGeometry;
+            }
 
-            //var ip = line.ClosestIntersection(rectangle);
-            //if (ip == null)
-            //{
-            //    Debug.Assert(false, $"Line {line} does not intersect rectangle {rectangle}");
-            //    // ReSharper disable once HeuristicUnreachableCode
-            //    return Geometry.Empty;
-            //}
+            var figure = this.CreatePathFigureStartingAt(ConnectorPoint1Property);
+            figure.Segments.Add(this.CreateLineSegmentTo(ConnectorVertexPointProperty));
+            figure.Segments.Add(this.CreateLineSegmentTo(ConnectorPoint2Property));
+            var geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+            return geometry;
+        }
 
-            //var cr = this.AdjustedCornerRadius();
-            //var sp = ip.Value + this.ConnectorOffset;
-            //line = new Line(sp, mp + length * direction.Negated());
-            //var p1 = ConnectorPoint.Find(line, this.ConnectorAngle / 2, rectangle, cr);
-            //var p2 = ConnectorPoint.Find(line, -this.ConnectorAngle / 2, rectangle, cr);
+        private PathFigure CreatePathFigureStartingAt(DependencyProperty property)
+        {
+            var figure = new PathFigure { IsClosed = true };
+            figure.Bind(PathFigure.StartPointProperty)
+                .OneWayTo(this, property);
+            return figure;
+        }
 
-            //var geometry = new StreamGeometry();
-            //using (var context = geometry.Open())
-            //{
-            //    context.BeginFigure(sp, true, true);
-            //    context.LineTo(p1, true, true);
-            //    context.LineTo(p2, true, true);
-            //}
+        private LineSegment CreateLineSegmentTo(DependencyProperty property)
+        {
+            var lineSegment = new LineSegment { IsStroked = true };
+            lineSegment.Bind(LineSegment.PointProperty)
+                .OneWayTo(this, property);
+            return lineSegment;
+        }
 
-            //geometry.Freeze();
-            //return geometry;
+        private static class ConnectorPoint
+        {
+            internal static Point Find(Ray toCenter, double angle, Ellipse ellipse)
+            {
+                var ip = toCenter.Rotate(angle)
+                                 .FirstIntersectionWith(ellipse);
+                if (ip != null)
+                {
+                    return ip.Value;
+                }
+
+                return FindTangentPoint(toCenter, Math.Sign(angle), ellipse);
+            }
+
+            private static Point FindTangentPoint(Ray toCenter, int sign, Ellipse ellipse)
+            {
+                var angle = sign > 0 ? 90 : -90;
+                var rotate = toCenter.Direction.Rotate(angle);
+                return ellipse.PointOnCircumference(rotate);
+            }
         }
 
         private class EllipseCenterConverter : IValueConverter

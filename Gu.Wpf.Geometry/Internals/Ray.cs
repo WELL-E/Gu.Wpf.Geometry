@@ -97,6 +97,11 @@
             return perp.Value.StartPoint - tangentLength * this.Direction;
         }
 
+        internal Point? FirstIntersectionWith(Ellipse rectangle)
+        {
+            throw new NotImplementedException();
+        }
+
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
         private static Point? IntersectionPoint(Ray ray, Line l2, bool mustBeBetweenStartAndEnd)
         {

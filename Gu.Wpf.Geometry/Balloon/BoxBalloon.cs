@@ -99,9 +99,7 @@ namespace Gu.Wpf.Geometry
             var width = renderSize.Width - this.StrokeThickness;
             var height = renderSize.Height - this.StrokeThickness;
             var mp = new Point(width / 2, height / 2);
-            var direction = this.ConnectorOffset.Normalized();
             var fromCenter = new Ray(mp, this.ConnectorOffset);
-
             var ip = fromCenter.FirstIntersectionWith(rectangle);
             if (ip == null)
             {
@@ -118,7 +116,7 @@ namespace Gu.Wpf.Geometry
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             this.SetValue(ConnectorPoint1Property, p1);
             this.SetValue(ConnectorPoint2Property, p2);
-            if (this.ConnectorGeometry != null && !this.ConnectorGeometry.IsEmpty())
+            if (this.ConnectorGeometry is PathGeometry)
             {
                 return this.ConnectorGeometry;
             }
