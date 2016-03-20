@@ -47,7 +47,7 @@
         // Not sure if radius makes any sense here, not very important since internal
         internal double RadiusInDirection(Vector directionFromCenter)
         {
-            var a = new Vector(1, 0).AngleTo(directionFromCenter) * Constants.ToRad;
+            var a = new Vector(1, 0).AngleTo(directionFromCenter) * Constants.DegToRad;
             var rx = this.RadiusX * Math.Cos(a);
             var ry = this.RadiusY * Math.Sin(a);
             return Math.Sqrt(rx * rx + ry * ry);
@@ -55,7 +55,7 @@
 
         internal Point PointOnCircumference(Vector directionFromCenter)
         {
-            var a = new Vector(1, 0).AngleTo(directionFromCenter) * Constants.ToRad;
+            var a = Math.Atan2(directionFromCenter.Y, directionFromCenter.X);
             var x = this.Center.X + this.RadiusX * Math.Cos(a);
             var y = this.Center.Y + this.RadiusY * Math.Sin(a);
             return new Point(x, y);

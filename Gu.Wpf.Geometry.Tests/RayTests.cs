@@ -60,11 +60,20 @@
 
         [Theory]
         [InlineData("-2,0; 1,0", "0,0; 1; 1", "-1,0")]
+        [InlineData("0,0; 1,0", "0,0; 1; 1", "1,0")]
+        [InlineData("0,0; 1,0", "0,0; 3; 5", "3,0")]
+        [InlineData("0,0; -1,0", "0,0; 3; 5", "-3,0")]
+        [InlineData("0,0; -1,0", "0,0; 1; 1", "-1,0")]
         [InlineData("-2,1; 1,0", "0,0; 1; 1", "0,1")]
         [InlineData("2,0; -1,0", "0,0; 1; 1", "1,0")]
         [InlineData("0,2; 0,-1", "0,0; 1; 1", "0,1")]
         [InlineData("0,-2; 0,1", "0,0; 1; 1", "0,-1")]
+        [InlineData("0,0; 0,1", "0,0; 1; 1", "0,1")]
+        [InlineData("0,0; 0,1", "0,0; 2; 3", "0,3")]
+        [InlineData("0,0; 0,-1", "0,0; 2; 3", "0,-3")]
+        [InlineData("0,0; 0,-1", "0,0; 1; 1", "0,-1")]
         [InlineData("-5,5; 1,-1", "3,5; 5; 3", "2,2")] // got this from CAD
+        [InlineData("-8,0; 1,-1", "0,0; 5; 3", "-1,-3")] // got this from CAD
         [InlineData("-2,0; -1,0", "0,0; 1; 1", "null")]
         [InlineData("-2,2; 1,0", "0,0; 1; 1", "null")]
         public void FirstIntersectionWithEllipse(string rs, string es, string eps)
@@ -78,6 +87,7 @@
 
         [Theory]
         [InlineData("0,0; 1; 1")]
+        [InlineData("0,0; 2; 3")]
         [InlineData("1,2; 3; 4")]
         [InlineData("-1,-2; 3; 4")]
         public void FirstIntersectionWithEllipseFromInsideRoundtrips(string es)
@@ -122,20 +132,28 @@
         public void FirstIntersectionWithRectFromOutsideRoundtrips(string rs)
         {
             var rect = Rect.Parse(rs);
-            var xv = new Vector(1, 0);
+            var xAxis = new Vector(1, 0);
             for (var i = -180; i < 180; i++)
             {
-                var direction = xv.Rotate(i);
-                var pointOnRect = new Ray(rect.CenterPoint(), direction).FirstIntersectionWith(rect).Value;
-                var lower = i%90 - 89;
-                var upper = 178 + lower;
-                for (var j = lower; j < upper; j++)
-                {
-                    var rayDirection = direction.Rotate(j);
-                    var ray = new Ray(pointOnRect + rayDirection, rayDirection.Negated());
-                    var actual = ray.FirstIntersectionWith(rect);
-                    Assert.Equal(pointOnRect, actual, NullablePointComparer.Default);
-                }
+                var direction = xAxis.Rotate(i);
+                var fromCenter = new Ray(rect.CenterPoint(), direction);
+                var pointOnRect = fromCenter.FirstIntersectionWith(rect).Value;
+                var ray = new Ray(pointOnRect + direction, direction.Negated());
+                var actual = ray.FirstIntersectionWith(rect);
+                Assert.Equal(pointOnRect, actual, NullablePointComparer.Default);
+                //var wallNormal = direction.SnapToOrtho();
+                //if (wallNormal == null)
+                //{
+                //    continue;
+                //}
+
+                //for (var j = -89; j < 89; j++)
+                //{
+                //    var rayDirection = wallNormal.Value.Rotate(j);
+                //    var ray = new Ray(pointOnRect + rayDirection, rayDirection.Negated());
+                //    var actual = ray.FirstIntersectionWith(rect);
+                //    Assert.Equal(pointOnRect, actual, NullablePointComparer.Default);
+                //}
             }
         }
     }

@@ -16,7 +16,7 @@
             this.Direction = direction.Normalized();
         }
 
-        private string DebuggerDisplay => $"{this.Point.ToString("F1")} -> {this.Direction.ToString("F1")}";
+        private string DebuggerDisplay => $"{this.Point.ToString("F1")}, {this.Direction.ToString("F1")} angle: {this.Direction.AngleToPositiveX().ToString("F1")}";
 
         internal static Ray Parse(string text)
         {
@@ -101,7 +101,9 @@
             var perp = this.PerpendicularLineTo(circle.Center);
             if (perp == null)
             {
-                return circle.Center - circle.Radius * this.Direction;
+                return this.Point.DistanceTo(circle.Center) < circle.Radius
+                    ? circle.Center + circle.Radius * this.Direction
+                    : circle.Center - circle.Radius * this.Direction;
             }
 
             var pl = perp.Value.Length;
@@ -124,9 +126,9 @@
             var nx2 = nx * nx;
             var ny = this.Direction.Y;
             var ny2 = ny * ny;
-            var x0 = this.Point.X;
+            var x0 = this.Point.X - ellipse.Center.X;
             var x02 = x0 * x0;
-            var y0 = this.Point.Y;
+            var y0 = this.Point.Y - ellipse.Center.Y;
             var y02 = y0 * y0;
             var a = ellipse.RadiusX;
             var a2 = a * a;
@@ -150,13 +152,13 @@
             var s = (-B - sqrt) / 2 * A;
             if (s < 0)
             {
-                s = (-B + sqrt) / 2 * A;
+                s = (-B + sqrt) / (2 * A);
                 return s > 0
-                           ? this.Point + s * this.Direction
-                           : (Point?)null;
+                    ? this.Point + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y)
+                    : (Point?)null;
             }
 
-            return this.Point + s * this.Direction;
+            return this.Point + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y);
         }
 
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
