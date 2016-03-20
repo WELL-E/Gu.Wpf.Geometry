@@ -110,7 +110,7 @@ namespace Gu.Wpf.Geometry
 
             var cr = this.AdjustedCornerRadius();
             var vertexPoint = ip.Value + this.ConnectorOffset;
-            var toCenter = fromCenter.Flip();
+            var toCenter = new Ray(vertexPoint, this.ConnectorOffset.Negated());
             var p1 = ConnectorPoint.Find(toCenter, this.ConnectorAngle / 2, rectangle, cr);
             var p2 = ConnectorPoint.Find(toCenter, -this.ConnectorAngle / 2, rectangle, cr);
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
@@ -269,14 +269,15 @@ namespace Gu.Wpf.Geometry
                     return corner.Center;
                 }
 
-                var toCenterDirection = ray.Point.VectorTo(corner.Center)
-                                            .Normalized();
-                var perpDirection = ray.Direction.AngleTo(toCenterDirection) > 0
-                                        ? toCenterDirection.Rotate(-90)
-                                        : toCenterDirection.Rotate(90);
-                var perpOffset = corner.Radius * perpDirection;
-                var tangentPoint = corner.Center + perpOffset;
-                return tangentPoint;
+                var lineToCenter = ray.PerpendicularLineTo(corner.Center);
+                if (lineToCenter == null)
+                {
+                    // this should never happen but failing silently
+                    // the balloons should not throw much.
+                    return corner.Center;
+                }
+
+                return corner.Center - corner.Radius*lineToCenter.Value.Direction;
             }
 
             private static Circle CreateTopLeft(Point p, double r) => new Circle(p.WithOffset(r, r), r);
