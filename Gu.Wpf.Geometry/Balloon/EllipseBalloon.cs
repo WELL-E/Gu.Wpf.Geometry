@@ -1,6 +1,7 @@
 namespace Gu.Wpf.Geometry
 {
     using System;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Windows;
     using System.Windows.Data;
@@ -95,23 +96,34 @@ namespace Gu.Wpf.Geometry
 
         private static class ConnectorPoint
         {
-            internal static Point Find(Ray toCenter, double angle, Ellipse ellipse)
+            internal static Point Find(Ray ray, double angle, Ellipse ellipse)
             {
-                var ip = toCenter.Rotate(angle)
-                                 .FirstIntersectionWith(ellipse);
+                return Find(ray.Rotate(angle), ellipse);
+            }
+
+            private static Point Find(Ray ray, Ellipse ellipse)
+            {
+                var ip = ray.FirstIntersectionWith(ellipse);
                 if (ip != null)
                 {
                     return ip.Value;
                 }
 
-                return FindTangentPoint(toCenter, Math.Sign(angle), ellipse);
+                return FindTangentPoint(ray, ellipse);
             }
 
-            private static Point FindTangentPoint(Ray toCenter, int sign, Ellipse ellipse)
+            private static Point FindTangentPoint(Ray toCenter, Ellipse ellipse)
             {
-                var angle = sign > 0 ? 90 : -90;
-                var rotate = toCenter.Direction.Rotate(angle);
-                return ellipse.PointOnCircumference(rotate);
+                var toEllipseCenter = toCenter.PerpendicularLineTo(ellipse.Center);
+                Debug.Assert(toEllipseCenter != null,"Ray should not go through ellipse center here");
+                if (toEllipseCenter == null)
+                {
+                    // this should never happen but failing silently
+                    // the balloons should not throw much returning random point.
+                    return ellipse.Center;
+                }
+
+                return ellipse.PointOnCircumference(toEllipseCenter.Value.Direction.Negated());
             }
         }
 

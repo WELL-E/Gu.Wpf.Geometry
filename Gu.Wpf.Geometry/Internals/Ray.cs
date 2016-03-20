@@ -149,16 +149,16 @@
             }
 
             var sqrt = Math.Sqrt(d);
-            var s = (-B - sqrt) / 2 * A;
+            var s = (-B - sqrt) / (2 * A);
             if (s < 0)
             {
                 s = (-B + sqrt) / (2 * A);
                 return s > 0
-                    ? this.Point + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y)
+                    ? new Point(x0,y0) + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y)
                     : (Point?)null;
             }
 
-            return this.Point + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y);
+            return new Point(x0, y0) + s * this.Direction + new Vector(ellipse.Center.X, ellipse.Center.Y);
         }
 
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()

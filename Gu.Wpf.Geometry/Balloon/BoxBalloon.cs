@@ -230,7 +230,6 @@ namespace Gu.Wpf.Geometry
 
             private static Point FindTangentPoint(Ray ray, Rect rectangle, CornerRadius cornerRadius)
             {
-                Circle corner;
                 var toMid = ray.PerpendicularLineTo(rectangle.CenterPoint());
                 Debug.Assert(toMid != null, "Cannot find tangent if line goes through center");
                 if (toMid == null)
@@ -245,6 +244,7 @@ namespace Gu.Wpf.Geometry
                     return ray.Point.Closest(rectangle.TopLeft, rectangle.TopRight, rectangle.BottomRight, rectangle.BottomLeft);
                 }
 
+                Circle corner;
                 switch (toMid.Value.Direction.Quadrant())
                 {
                     case Quadrant.NegativeXPositiveY:
@@ -270,6 +270,7 @@ namespace Gu.Wpf.Geometry
                 }
 
                 var lineToCenter = ray.PerpendicularLineTo(corner.Center);
+                Debug.Assert(lineToCenter != null, "Ray cannot go through center here");
                 if (lineToCenter == null)
                 {
                     // this should never happen but failing silently
