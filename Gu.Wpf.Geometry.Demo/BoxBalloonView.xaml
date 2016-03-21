@@ -47,7 +47,7 @@
                        Grid.Column="1"
                        Stroke="Yellow"
                        StrokeThickness="4" />
-            
+
             <geometry:BoxBalloon Grid.Row="1"
                                  Grid.Column="1"
                                  ConnectorAngle="45"

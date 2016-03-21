@@ -194,10 +194,10 @@ namespace Gu.Wpf.Geometry
                         return FindTangentPoint(ray, rectangle, cornerRadius);
                     }
 
-                    return ip.Value + strokeThickness/2*ray.Direction;
+                    return ip.Value + strokeThickness * ray.Direction;
                 }
 
-                return ip.Value + strokeThickness / 2 * ray.Direction;
+                return ip.Value + strokeThickness * ray.Direction;
             }
 
             private static bool TryGetCorner(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius, out Circle corner)

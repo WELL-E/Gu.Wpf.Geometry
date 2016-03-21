@@ -17,12 +17,9 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry GetOrCreateBoxGeometry(Size renderSize)
         {
-            var width = renderSize.Width;
-            var height = renderSize.Height;
-            var rx = width / 2;
-            var ry = height / 2;
-            this.SetValue(EllipseProperty, new Ellipse(new Point(rx, ry), rx, ry));
-            if (width <= 0 || height <= 0)
+            var ellipse = Ellipse.CreateFromSize(renderSize);
+            this.SetValue(EllipseProperty, ellipse);
+            if (ellipse.RadiusX <= 0 || ellipse.RadiusY <= 0)
             {
                 return Geometry.Empty;
             }
@@ -44,11 +41,8 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
         {
-            var width = renderSize.Width - this.StrokeThickness;
-            var height = renderSize.Height - this.StrokeThickness;
-            var rx = width / 2;
-            var ry = height / 2;
-            var ellipse = new Ellipse(new Point(rx, ry), rx, ry);
+            var ellipse = Ellipse.CreateFromSize(renderSize);
+            this.SetValue(EllipseProperty, ellipse);
             if (ellipse.IsZero)
             {
                 return Geometry.Empty;
@@ -59,8 +53,8 @@ namespace Gu.Wpf.Geometry
             var vertexPoint = ip + this.ConnectorOffset;
             var ray = new Ray(vertexPoint, this.ConnectorOffset.Negated());
 
-            var p1 = ConnectorPoint.Find(ray, this.ConnectorAngle / 2, ellipse);
-            var p2 = ConnectorPoint.Find(ray, -this.ConnectorAngle / 2, ellipse);
+            var p1 = ConnectorPoint.Find(ray, this.ConnectorAngle / 2, StrokeThickness, ellipse);
+            var p2 = ConnectorPoint.Find(ray, -this.ConnectorAngle / 2, StrokeThickness, ellipse);
 
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             this.SetValue(ConnectorPoint1Property, p1);
@@ -96,17 +90,17 @@ namespace Gu.Wpf.Geometry
 
         private static class ConnectorPoint
         {
-            internal static Point Find(Ray ray, double angle, Ellipse ellipse)
+            internal static Point Find(Ray ray, double angle, double strokeThickness, Ellipse ellipse)
             {
-                return Find(ray.Rotate(angle), ellipse);
+                return Find(ray.Rotate(angle), strokeThickness, ellipse);
             }
 
-            private static Point Find(Ray ray, Ellipse ellipse)
+            private static Point Find(Ray ray, double strokeThickness, Ellipse ellipse)
             {
                 var ip = ray.FirstIntersectionWith(ellipse);
                 if (ip != null)
                 {
-                    return ip.Value;
+                    return ip.Value + strokeThickness * ray.Direction;
                 }
 
                 return FindTangentPoint(ray, ellipse);
@@ -115,7 +109,7 @@ namespace Gu.Wpf.Geometry
             private static Point FindTangentPoint(Ray toCenter, Ellipse ellipse)
             {
                 var toEllipseCenter = toCenter.PerpendicularLineTo(ellipse.Center);
-                Debug.Assert(toEllipseCenter != null,"Ray should not go through ellipse center here");
+                Debug.Assert(toEllipseCenter != null, "Ray should not go through ellipse center here");
                 if (toEllipseCenter == null)
                 {
                     // this should never happen but failing silently

@@ -30,6 +30,15 @@
 
         private string DebuggerDisplay => $"{this.Center.ToString("F1")} rx: {this.RadiusX.ToString("F1")} ry: {this.RadiusY.ToString("F1")}";
 
+        internal static Ellipse CreateFromSize(Size renderSize)
+        {
+            var width = renderSize.Width;
+            var height = renderSize.Height;
+            var rx = width / 2;
+            var ry = height / 2;
+            return new Ellipse(new Point(rx, ry), rx, ry);
+        }
+
         internal static Ellipse Parse(string text)
         {
             var strings = text.Split(';');
