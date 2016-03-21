@@ -30,10 +30,9 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry GetOrCreateBoxGeometry(Size renderSize)
         {
-            var width = renderSize.Width - this.StrokeThickness;
-            var height = renderSize.Height - this.StrokeThickness;
-            this.SetValue(RectProperty, new Rect(new Point(0, 0), new Point(width, height)));
-            if (width <= 0 || height <= 0)
+            var rect = new Rect(new Point(0, 0), renderSize);
+            this.SetValue(RectProperty, rect);
+            if (rect.Width <= 0 || rect.Height <= 0)
             {
                 return Geometry.Empty;
             }
@@ -65,19 +64,19 @@ namespace Gu.Wpf.Geometry
                         ? new Point(cr.TopLeft + this.StrokeThickness / 2, this.StrokeThickness / 2)
                         : new Point(this.StrokeThickness / 2, this.StrokeThickness / 2);
                     context.BeginFigure(p, true, true);
-                    p = p.WithOffset(width - cr.TopLeft - cr.TopRight, 0);
+                    p = p.WithOffset(rect.Width - cr.TopLeft - cr.TopRight, 0);
                     context.LineTo(p, true, true);
                     p = context.DrawCorner(p, cr.TopRight, cr.TopRight);
 
-                    p = p.WithOffset(0, height - cr.TopRight - cr.BottomRight);
+                    p = p.WithOffset(0, rect.Height - cr.TopRight - cr.BottomRight);
                     context.LineTo(p, true, true);
                     p = context.DrawCorner(p, -cr.BottomRight, cr.BottomRight);
 
-                    p = p.WithOffset(-width + cr.BottomRight + cr.BottomLeft, 0);
+                    p = p.WithOffset(-rect.Width + cr.BottomRight + cr.BottomLeft, 0);
                     context.LineTo(p, true, true);
                     p = context.DrawCorner(p, -cr.BottomLeft, -cr.BottomLeft);
 
-                    p = p.WithOffset(0, -height + cr.TopLeft + cr.BottomLeft);
+                    p = p.WithOffset(0, -rect.Height + cr.TopLeft + cr.BottomLeft);
                     context.LineTo(p, true, true);
                     context.DrawCorner(p, cr.TopLeft, -cr.TopLeft);
                 }
@@ -90,16 +89,12 @@ namespace Gu.Wpf.Geometry
         protected override Geometry GetOrCreateConnectorGeometry(Size renderSize)
         {
             var rectangle = new Rect(new Point(0, 0), renderSize);
-            rectangle.Inflate(-this.StrokeThickness, -this.StrokeThickness);
-            if (rectangle.IsEmpty)
+            if (rectangle.Width <= 0 || rectangle.Height <= 0)
             {
                 return Geometry.Empty;
             }
 
-            var width = renderSize.Width - this.StrokeThickness;
-            var height = renderSize.Height - this.StrokeThickness;
-            var mp = new Point(width / 2, height / 2);
-            var fromCenter = new Ray(mp, this.ConnectorOffset);
+            var fromCenter = new Ray(rectangle.CenterPoint(), this.ConnectorOffset);
             var ip = fromCenter.FirstIntersectionWith(rectangle);
             if (ip == null)
             {
@@ -111,8 +106,8 @@ namespace Gu.Wpf.Geometry
             var cr = this.AdjustedCornerRadius();
             var vertexPoint = ip.Value + this.ConnectorOffset;
             var toCenter = new Ray(vertexPoint, this.ConnectorOffset.Negated());
-            var p1 = ConnectorPoint.Find(toCenter, this.ConnectorAngle / 2, rectangle, cr);
-            var p2 = ConnectorPoint.Find(toCenter, -this.ConnectorAngle / 2, rectangle, cr);
+            var p1 = ConnectorPoint.Find(toCenter, this.ConnectorAngle / 2, this.StrokeThickness, rectangle, cr);
+            var p2 = ConnectorPoint.Find(toCenter, -this.ConnectorAngle / 2, this.StrokeThickness, rectangle, cr);
             this.SetValue(ConnectorVertexPointProperty, vertexPoint);
             this.SetValue(ConnectorPoint1Property, p1);
             this.SetValue(ConnectorPoint2Property, p2);
@@ -131,8 +126,7 @@ namespace Gu.Wpf.Geometry
 
         protected virtual CornerRadius AdjustedCornerRadius()
         {
-            var cr = this.CornerRadius.InflateBy(-this.StrokeThickness / 2)
-                                 .WithMin(0);
+            var cr = this.CornerRadius;
             var left = cr.TopLeft + cr.BottomLeft;
             var right = cr.TopRight + cr.BottomRight;
             var top = cr.TopLeft + cr.TopRight;
@@ -147,9 +141,7 @@ namespace Gu.Wpf.Geometry
 
             var factor = Math.Min(Math.Min(this.ActualWidth / top, this.ActualWidth / bottom),
                                   Math.Min(this.ActualHeight / left, this.ActualHeight / right));
-            return cr.ScaleBy(factor)
-                     .InflateBy(-this.StrokeThickness / 2)
-                     .WithMin(0);
+            return cr.ScaleBy(factor);
         }
 
         private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -179,13 +171,13 @@ namespace Gu.Wpf.Geometry
 
         private static class ConnectorPoint
         {
-            internal static Point Find(Ray toCenter, double angle, Rect rectangle, CornerRadius cornerRadius)
+            internal static Point Find(Ray toCenter, double angle, double strokeThickness, Rect rectangle, CornerRadius cornerRadius)
             {
                 var rotated = toCenter.Rotate(angle);
-                return FindForRotated(rotated, rectangle, cornerRadius);
+                return FindForRotated(rotated, strokeThickness, rectangle, cornerRadius);
             }
 
-            private static Point FindForRotated(Ray ray, Rect rectangle, CornerRadius cornerRadius)
+            private static Point FindForRotated(Ray ray, double strokeThickness, Rect rectangle, CornerRadius cornerRadius)
             {
                 var ip = ray.FirstIntersectionWith(rectangle);
                 if (ip == null)
@@ -202,10 +194,10 @@ namespace Gu.Wpf.Geometry
                         return FindTangentPoint(ray, rectangle, cornerRadius);
                     }
 
-                    return ip.Value;
+                    return ip.Value + strokeThickness/2*ray.Direction;
                 }
 
-                return ip.Value;
+                return ip.Value + strokeThickness / 2 * ray.Direction;
             }
 
             private static bool TryGetCorner(Point intersectionPoint, Rect rectangle, CornerRadius cornerRadius, out Circle corner)
@@ -278,7 +270,7 @@ namespace Gu.Wpf.Geometry
                     return corner.Center;
                 }
 
-                return corner.Center - corner.Radius*lineToCenter.Value.Direction;
+                return corner.Center - corner.Radius * lineToCenter.Value.Direction;
             }
 
             private static Circle CreateTopLeft(Point p, double r) => new Circle(p.WithOffset(r, r), r);

@@ -17,8 +17,8 @@ namespace Gu.Wpf.Geometry
 
         protected override Geometry GetOrCreateBoxGeometry(Size renderSize)
         {
-            var width = renderSize.Width - this.StrokeThickness;
-            var height = renderSize.Height - this.StrokeThickness;
+            var width = renderSize.Width;
+            var height = renderSize.Height;
             var rx = width / 2;
             var ry = height / 2;
             this.SetValue(EllipseProperty, new Ellipse(new Point(rx, ry), rx, ry));

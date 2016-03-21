@@ -31,13 +31,17 @@ namespace Gu.Wpf.Geometry
             "PlacementTarget",
             typeof(UIElement),
             typeof(BalloonBase),
-            new PropertyMetadata(default(UIElement), OnPlacementTargetChanged));
+            new PropertyMetadata(
+                default(UIElement),
+                OnPlacementTargetChanged));
 
         public static readonly DependencyProperty PlacementOptionsProperty = DependencyProperty.Register(
             "PlacementOptions",
             typeof(PlacementOptions),
             typeof(BalloonBase),
-            new PropertyMetadata(Wpf.Geometry.PlacementOptions.Auto, OnPlacementOptionsChanged));
+            new PropertyMetadata(
+                PlacementOptions.Auto, 
+                OnPlacementOptionsChanged));
 
         protected static readonly DependencyProperty ConnectorVertexPointProperty = DependencyProperty.Register(
             "ConnectorVertexPoint",
@@ -102,6 +106,11 @@ namespace Gu.Wpf.Geometry
 
         protected override Size ArrangeOverride(Size finalSize)
         {
+            if (finalSize.Width > this.StrokeThickness && finalSize.Height > this.StrokeThickness)
+            {
+                finalSize = new Size(finalSize.Width - this.StrokeThickness, finalSize.Height - this.StrokeThickness);
+            }
+
             return finalSize;
         }
 
@@ -139,10 +148,10 @@ namespace Gu.Wpf.Geometry
             }
 
             var boxGeometry = this.GetOrCreateBoxGeometry(this.RenderSize);
-            var connectorGeometry = this.CanCreateConnectorGeometry() 
+            var connectorGeometry = this.CanCreateConnectorGeometry()
                     ? this.GetOrCreateConnectorGeometry(this.RenderSize)
                     : Geometry.Empty;
-            if (ReferenceEquals(boxGeometry, this.BoxGeometry) && 
+            if (ReferenceEquals(boxGeometry, this.BoxGeometry) &&
                 ReferenceEquals(connectorGeometry, this.ConnectorGeometry))
             {
                 return;
